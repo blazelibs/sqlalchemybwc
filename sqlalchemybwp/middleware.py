@@ -27,7 +27,8 @@ class SQLAlchemyApp(object):
         self.container = SQLAlchemyContainer()
         db.sess = self.container.Session
         visitmods('model.orm')
-
+        visitmods('model.metadata')
+        
     def __call__(self, environ, start_response):
         def response_cycle_teardown():
             self.container.Session.remove()
