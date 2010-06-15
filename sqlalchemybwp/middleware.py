@@ -25,16 +25,14 @@ class SQLAlchemyApp(object):
     def __init__(self, application):
         self.application = application
         self.container = SQLAlchemyContainer()
+        db._push_object(self.container)
         db.sess = self.container.Session
         visitmods('model.orm')
+        visitmods('model.metadata')
 
     def __call__(self, environ, start_response):
         def response_cycle_teardown():
             self.container.Session.remove()
-
-        environ.setdefault('pysmvt.request_setup', [])
         environ.setdefault('pysmvt.response_cycle_teardown', [])
-        environ['pysmvt.request_setup'].append(request_setup)
         environ['pysmvt.response_cycle_teardown'].append(response_cycle_teardown)
         return self.application(environ, start_response)
-            
