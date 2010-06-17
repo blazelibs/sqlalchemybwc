@@ -1,1 +1,1 @@
-from middleware import db
+from lib.middleware import db
