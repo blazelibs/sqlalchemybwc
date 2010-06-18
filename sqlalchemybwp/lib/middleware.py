@@ -31,8 +31,14 @@ class SQLAlchemyApp(object):
         visitmods('model.metadata')
         
     def __call__(self, environ, start_response):
+        # clear the session after every response cycle
         def response_cycle_teardown():
             self.container.Session.remove()
         environ.setdefault('pysmvt.response_cycle_teardown', [])
         environ['pysmvt.response_cycle_teardown'].append(response_cycle_teardown)
+
+        # register the db variable for this request/thread
+        environ['paste.registry'].register(db, self.container)
+
+        # call the inner application
         return self.application(environ, start_response)
