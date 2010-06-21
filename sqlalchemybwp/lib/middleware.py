@@ -1,4 +1,4 @@
-from blazeweb import settings
+from blazeweb.globals import settings
 from blazeweb.hierarchy import visitmods
 from paste.registry import StackedObjectProxy
 from sqlalchemy import engine_from_config, MetaData
