@@ -1,5 +1,5 @@
-from pysmvt import settings
-from pysmvt.hierarchy import visitmods
+from blazeweb import settings
+from blazeweb.hierarchy import visitmods
 from paste.registry import StackedObjectProxy
 from sqlalchemy import engine_from_config, MetaData
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -34,8 +34,8 @@ class SQLAlchemyApp(object):
         # clear the session after every response cycle
         def response_cycle_teardown():
             self.container.Session.remove()
-        environ.setdefault('pysmvt.response_cycle_teardown', [])
-        environ['pysmvt.response_cycle_teardown'].append(response_cycle_teardown)
+        environ.setdefault('blazeweb.response_cycle_teardown', [])
+        environ['blazeweb.response_cycle_teardown'].append(response_cycle_teardown)
 
         # register the db variable for this request/thread
         environ['paste.registry'].register(db, self.container)
