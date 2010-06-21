@@ -18,7 +18,7 @@ setup(
     packages=find_packages(exclude=['ez_setup']),
     zip_safe=False,
     install_requires=[
-        'pysmvt>=dev',
+        'blazeweb>=dev',
         'SQLAlchemy>=0.5'
     ],
 )
