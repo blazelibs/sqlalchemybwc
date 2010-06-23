@@ -12,7 +12,7 @@ def _is_unique_msg(dialect, msg):
         easier unit testing this way
     """
     if dialect == 'postgresql':
-        if 'violates unique constraint' in msg:
+        if 'duplicate key value violates unique constraint' in msg:
             return True
     elif dialect == 'mssql':
         if 'Cannot insert duplicate key' in msg:
