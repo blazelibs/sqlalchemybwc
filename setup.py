@@ -18,7 +18,8 @@ setup(
     packages=find_packages(exclude=['ez_setup']),
     zip_safe=False,
     install_requires=[
-        'blazeweb>=dev',
-        'SQLAlchemy>=0.5'
+        'BlazeWeb>=0.3.0dev',
+        'SQLAlchemy>=0.5',
+        'savalidation>=dev'
     ],
 )
