@@ -13,19 +13,37 @@ class UniqueRecord(Base):
     name = sa.Column(sa.Unicode(255), nullable=False, unique=True)
 
     @transaction
-    def add(cls, name, inactive_flag = False):
+    def add(cls, name):
         ur = cls()
         ur.name = name
         db.sess.add(ur)
         return ur
 
     @ignore_unique
-    def add_iu(cls, name, inactive_flag = False):
-        cls.add(name, inactive_flag)
+    def add_iu(cls, name):
+        cls.add(name)
 
     @classmethod
     def get(cls, oid):
         return db.sess.query(cls).get(oid)
+
+class UniqueRecordTwo(Base):
+    __tablename__ = 'sabwp_unique_records_two'
+
+    name = sa.Column(sa.Unicode(255), nullable=False, unique=True)
+    email = sa.Column(sa.Unicode(255), nullable=False, unique=True)
+
+    @transaction
+    def add(cls, name, email):
+        ur = cls()
+        ur.name = name
+        ur.email = email
+        db.sess.add(ur)
+        return ur
+
+    @ignore_unique
+    def add_iu(cls, name, email):
+        cls.add(name,  email)
 
 class OneToNone(Base):
     __tablename__ = 'sabwp_onetonone_records'
@@ -51,3 +69,21 @@ class Car(Base):
         o = cls(**kwargs)
         db.sess.add(o)
         return o
+
+class Truck(Base):
+    __tablename__ = 'trucks'
+
+    make = sa.Column(sa.Unicode(255), nullable=False)
+    model = sa.Column(sa.Unicode(255), nullable=False)
+
+    @transaction
+    def add(cls, make, model):
+        o = cls(make=make, model=model)
+        db.sess.add(o)
+        return o
+
+    @ignore_unique
+    def add_iu(cls, make, model):
+        cls.add(make,  model)
+
+sa.Index('uidx_sabwp_truck_makemodel', Truck.make, Truck.model, unique=True)
