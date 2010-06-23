@@ -13,6 +13,13 @@ class Default(DefaultSettings):
 
         self.add_plugin(app_package, 'sqlalchemy', 'sqlalchemybwp')
 
+class Dev(Default):
+    def init(self):
+        Default.init(self)
+        self.apply_dev_settings()
+
+        self.db.url = 'sqlite://'
+
 class Test(Default):
     def init(self):
         Default.init(self)
