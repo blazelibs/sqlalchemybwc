@@ -1,5 +1,6 @@
+from nose.tools import eq_
 from sqlalchemybwp import db
-from sqlalchemybwp.lib.decorators import one_to_none
+from sqlalchemybwp.lib.decorators import one_to_none_ncm
 from sqlalchemybwp.lib.helpers import is_unique_exc, _is_unique_msg
 
 from sabwptestapp.model.orm import UniqueRecord, OneToNone, Car, \
@@ -28,14 +29,14 @@ def test_ignore_unique():
     assert UniqueRecord.add(u'test_ignore_unique_ok2')
 
 def test_ignore_unique_two():
-    assert UniqueRecordTwo.add(u'test_ignore_unique_two', u'tiu@example.com')
+    assert UniqueRecordTwo.add(name=u'test_ignore_unique_two', email=u'tiu@example.com')
 
     # unique exception should be ignore with iu version
-    assert not UniqueRecordTwo.add_iu(u'test_ignore_unique_two', u'tiu@example.com')
+    assert not UniqueRecordTwo.add_iu(name=u'test_ignore_unique_two', email=u'tiu@example.com')
 
     # should fail if we don't use the ignore unique (ui) method
     try:
-        UniqueRecordTwo.add(u'test_ignore_unique_two', u'tiu@example.com')
+        UniqueRecordTwo.add(name=u'test_ignore_unique_two', email=u'tiu@example.com')
         assert False
     except Exception, e:
         if not is_unique_exc(e):
@@ -63,20 +64,20 @@ def test_transaction_decorator():
     ur = UniqueRecord.get(urid)
     assert ur.name == u'test_transaction_decorator'
 
-def test_one_to_none():
+def test_one_to_none_ncm():
     a = OneToNone.add(u'a')
     b1 = OneToNone.add(u'b')
     b2 = OneToNone.add(u'b')
 
-    @one_to_none
+    @one_to_none_ncm
     def hasone():
         return db.sess.query(OneToNone).filter_by(ident=u'a').one()
 
-    @one_to_none
+    @one_to_none_ncm
     def hasnone():
         return db.sess.query(OneToNone).filter_by(ident=u'c').one()
 
-    @one_to_none
+    @one_to_none_ncm
     def hasmany():
         return db.sess.query(OneToNone).filter_by(ident=u'b').one()
 
@@ -106,6 +107,37 @@ def test_declarative_stuff():
 
     assert c.updatedts is not None
 
+def test_from_dict():
+    c = Car()
+    c.from_dict({
+        'make': u'chevy',
+        'model': u'cav',
+        'year': 1993
+    })
+    db.sess.add(c)
+    db.sess.commit()
+    cid = c.id
+    assert cid
+    db.sess.remove()
+    c = Car.get(cid)
+    assert c.make == 'chevy'
+
+def test_get_by_and_where():
+    Car.delete_all()
+    Car.add(**{
+        'make': u'chevy',
+        'model': u'astro',
+        'year': 1993
+    })
+    c = Car.get_by(make=u'chevy', model=u'astro', year=1993)
+    assert c.model == 'astro'
+
+    c = Car.get_where(Car.make == u'chevy', Car.year < 2000)
+    assert c.model == 'astro'
+
+    c = Car.get_where(Car.make == u'chevy', Car.year > 2000)
+    assert c is None
+
 def test_is_unique_msg():
     totest = {
         'sqlite': [
@@ -124,3 +156,214 @@ def test_is_unique_msg():
     for k,v in totest.iteritems():
         for msg in v:
             yield dotest, k, msg
+
+def test_delete():
+    c = Car.add(**{
+        'make': u'chevy',
+        'model': u'astro',
+        'year': 1993
+    })
+    cid = c.id
+    assert Car.delete(cid)
+    assert not Car.delete(cid)
+
+def test_count_and_delete_all():
+    Car.delete_all()
+    c = Car.add(**{
+        'make': u'test',
+        'model': u'count',
+        'year': 2010
+    })
+    c = Car.add(**{
+        'make': u'test',
+        'model': u'count',
+        'year': 2009
+    })
+    c = Car.add(**{
+        'make': u'test',
+        'model': u'count2',
+        'year': 2010
+    })
+    assert Car.count() == 3
+    assert Car.count_by(model=u'count') == 2
+    assert Car.delete_all() == 3
+
+def test_delete_where():
+    Car.delete_all()
+    c = Car.add(**{
+        'make': u'test',
+        'model': u'count',
+        'year': 2010
+    })
+    c = Car.add(**{
+        'make': u'test',
+        'model': u'count',
+        'year': 2009
+    })
+    c = Car.add(**{
+        'make': u'test',
+        'model': u'count2',
+        'year': 2010
+    })
+
+    # two clauses
+    assert Car.delete_where(Car.model == u'count', Car.year == 2009) == 1
+    assert Car.count() == 2
+
+    # one clause
+    assert Car.delete_where(Car.model == u'count2') == 1
+
+def test_lists_pairs_firsts():
+    Car.delete_all()
+    c1 = Car.add(**{
+        'make': u'test',
+        'model': u'count',
+        'year': 2008
+    })
+    c2 = Car.add(**{
+        'make': u'test',
+        'model': u'count',
+        'year': 2009
+    })
+    c3 = Car.add(**{
+        'make': u'test',
+        'model': u'count2',
+        'year': 2010
+    })
+
+    result = Car.list()
+    assert len(result) == 3
+    assert result[2] is c3
+
+    result = Car.list_by(model=u'count2')
+    assert len(result) == 1
+    assert result[0] is c3
+
+    result = Car.list_where(Car.model == u'count2')
+    assert len(result) == 1
+    assert result[0] is c3
+
+    # with order_by clauses
+    result = Car.list(order_by=Car.year.desc())
+    assert result[2] is c1
+
+    # multiple values for order_by
+    result = Car.list(order_by=(Car.model, Car.year.desc()))
+    assert result[0] is c2, result
+
+    # with order by
+    result = Car.list_by(model=u'count', order_by=Car.year.desc())
+    assert result[0] is c2
+
+    # with order by
+    result = Car.list_where(Car.model == u'count', order_by=Car.year.desc())
+    assert result[0] is c2
+
+    #with extra arg
+    try:
+        Car.list_where(Car.model == u'count', order_by=Car.year.desc(), erroneous='foo')
+        assert False
+    except ValueError:
+        pass
+
+    ###
+    ### test pairs
+    ###
+    expect = [
+        (c1.id, c1.year),
+        (c2.id, c2.year),
+        (c3.id, c3.year),
+    ]
+    result = Car.pairs('id:year')
+    eq_(expect, result)
+
+    expect = [
+        (c1.model, c1.year),
+        (c2.model, c2.year),
+        (c3.model, c3.year),
+    ]
+    result = Car.pairs('model:year')
+    eq_(expect, result)
+
+    expect = [
+        (c3.model, c3.year),
+        (c2.model, c2.year),
+        (c1.model, c1.year),
+    ]
+    result = Car.pairs('model:year', order_by=Car.year.desc())
+    eq_(expect, result)
+
+
+    expect = [
+        (c2.model, c2.year),
+        (c1.model, c1.year),
+    ]
+    result = Car.pairs_by('model:year', model=u'count', order_by=Car.year.desc())
+    eq_(expect, result)
+
+    result = Car.pairs_where('model:year', Car.model == u'count', order_by=Car.year.desc())
+    eq_(expect, result)
+
+    ###
+    ### test firsts
+    ###
+    c = Car.first()
+    assert c is c1
+
+    c = Car.first(order_by=Car.year.desc())
+    assert c is c3
+
+    c = Car.first_by(model=u'count2')
+    assert c is c3
+
+    c = Car.first_by(model=u'count', order_by=Car.year.desc())
+    assert c is c2
+
+    c = Car.first_where(Car.model == u'count2')
+    assert c is c3
+
+    c = Car.first_where(Car.model == u'count', order_by=Car.year.desc())
+    assert c is c2
+
+    c = Car.first_by(model=u'nothere')
+    assert c is None
+
+    try:
+        c = Car.first_where(Car.model == u'count2', erronous='foo')
+    except ValueError:
+        pass
+
+def test_edit():
+    Car.delete_all()
+    c1 = Car.add(**{
+        'make': u'test',
+        'model': u'count',
+        'year': 2008
+    })
+    cid = c1.id
+    Car.edit(c1.id, make=u'ford', year=2010)
+    db.sess.remove()
+    c = Car.first()
+    assert c.make == 'ford'
+    assert c.model == 'count'
+    assert c.year == 2010
+    c1 = Car.edit(year=2011, id=cid)
+    assert c.make == 'ford'
+    assert c.model == 'count'
+    assert c.year == 2011
+
+    try:
+        c1 = Car.edit(year=2011)
+        assert False
+    except ValueError:
+        pass
+
+def test_update():
+    Car.delete_all()
+    c = Car.update(make=u'ford', year=2010, model='test')
+    assert Car.count() == 1
+    Car.update(c.id, year=2011)
+    assert Car.count() == 1
+    assert c.year == 2011
+
+
