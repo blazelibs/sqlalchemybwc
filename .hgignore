@@ -6,3 +6,5 @@
 ^docs/_build
 [^/]+-stats\.txt$
 glob:sabwptestapp/config/site_settings.py
+glob:cover
+glob:.coverage
