@@ -50,7 +50,7 @@ def ignore_unique(f):
     return classmethod(ignore_unique_ncm(f))
 
 @decorator
-def one_to_none(f, *args, **kwargs):
+def one_to_none_ncm(f, *args, **kwargs):
     """
         wraps a function that uses SQLAlahcemy's ORM .one() method and returns
         None instead of raising an exception if there was no record returned.
@@ -62,3 +62,9 @@ def one_to_none(f, *args, **kwargs):
         if 'No row was found for one()' != str(e):
             raise
         return None
+
+def one_to_none(f):
+    """
+        like one_to_none_ncm() but makes the decorated function a class method
+    """
+    return classmethod(one_to_none_ncm(f))

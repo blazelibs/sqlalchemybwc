@@ -23,27 +23,11 @@ class UniqueRecord(Base):
     def add_iu(cls, name):
         cls.add(name)
 
-    @classmethod
-    def get(cls, oid):
-        return db.sess.query(cls).get(oid)
-
 class UniqueRecordTwo(Base):
     __tablename__ = 'sabwp_unique_records_two'
 
     name = sa.Column(sa.Unicode(255), nullable=False, unique=True)
     email = sa.Column(sa.Unicode(255), nullable=False, unique=True)
-
-    @transaction
-    def add(cls, name, email):
-        ur = cls()
-        ur.name = name
-        ur.email = email
-        db.sess.add(ur)
-        return ur
-
-    @ignore_unique
-    def add_iu(cls, name, email):
-        cls.add(name,  email)
 
 class OneToNone(Base):
     __tablename__ = 'sabwp_onetonone_records'
@@ -64,14 +48,11 @@ class Car(Base):
     model = sa.Column(sa.Unicode(255), nullable=False)
     year = sa.Column(sa.Integer, nullable=False)
 
-    @transaction
-    def add(cls, **kwargs):
-        o = cls(**kwargs)
-        db.sess.add(o)
-        return o
+    def __repr__(self):
+        return '<Car %s, %s, %s>' % (self.make, self.model, self.year)
 
 class Truck(Base):
-    __tablename__ = 'trucks'
+    __tablename__ = 'sabwp_trucks'
 
     make = sa.Column(sa.Unicode(255), nullable=False)
     model = sa.Column(sa.Unicode(255), nullable=False)
