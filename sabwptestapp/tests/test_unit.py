@@ -361,10 +361,8 @@ def test_edit():
 
 def test_update():
     Car.delete_all()
-    c = Car.update(make=u'ford', year=2010, model='test')
+    c = Car.update(make=u'ford', year=2010, model=u'test')
     assert Car.count() == 1
     Car.update(c.id, year=2011)
     assert Car.count() == 1
     assert c.year == 2011
-
-

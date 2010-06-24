@@ -3,6 +3,8 @@ from datetime import datetime
 from blazeutils.helpers import tolist
 import savalidation as saval
 import sqlalchemy as sa
+from sqlalchemy.ext.declarative import DeclarativeMeta as saDeclarativeMeta
+from sqlalchemy.ext.declarative import declarative_base as sa_declarative_base
 import sqlalchemy.orm as saorm
 import sqlalchemy.sql as sasql
 
@@ -10,11 +12,17 @@ from plugstack.sqlalchemy import db
 from plugstack.sqlalchemy.lib.decorators import one_to_none, transaction, \
     ignore_unique
 
-class DeclarativeBase(saval.DeclarativeBase):
+class DeclarativeMeta(saDeclarativeMeta):
+    def __init__(cls, classname, bases, dict_):
+       cls._add_default_cols()
+       return saDeclarativeMeta.__init__(cls, classname, bases, dict_)
 
-    id = sa.Column(sa.Integer, primary_key=True)
-    createdts = sa.Column(sa.DateTime, nullable=False, server_default=sasql.text('CURRENT_TIMESTAMP'))
-    updatedts = sa.Column(sa.DateTime, onupdate=datetime.now)
+    def _add_default_cols(cls):
+        cls.id = sa.Column(sa.Integer, primary_key=True)
+        cls.createdts = sa.Column(sa.DateTime, nullable=False, server_default=sasql.text('CURRENT_TIMESTAMP'))
+        cls.updatedts = sa.Column(sa.DateTime, onupdate=datetime.now)
+
+class DeclarativeBase(saval.DeclarativeBase):
 
     @transaction
     def add(cls, **kwargs):
@@ -239,4 +247,5 @@ class DeclarativeBase(saval.DeclarativeBase):
 
 def declarative_base(*args, **kwargs):
     kwargs.setdefault('cls', DeclarativeBase)
-    return saval.declarative_base(*args, **kwargs)
+    kwargs.setdefault('metaclass', DeclarativeMeta)
+    return sa_declarative_base(*args, **kwargs)
