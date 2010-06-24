@@ -173,6 +173,10 @@ class DeclarativeBase(saval.DeclarativeBase):
     def count_by(cls, **kwargs):
         return db.sess.query(cls).filter_by(**kwargs).count()
 
+    @classmethod
+    def count_where(cls, clause, *extra_clauses):
+        where_clause = cls.combine_clauses(clause, extra_clauses)
+        return db.sess.query(cls).filter(where_clause).count()
 
     def to_dict(self, exclude=[]):
         col_prop_names = [p.key for p in self.__mapper__.iterate_properties \
