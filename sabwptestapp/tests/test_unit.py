@@ -4,7 +4,7 @@ from sqlalchemybwp.lib.decorators import one_to_none_ncm
 from sqlalchemybwp.lib.helpers import is_unique_exc, _is_unique_msg
 
 from sabwptestapp.model.orm import UniqueRecord, OneToNone, Car, \
-    UniqueRecordTwo, Truck
+    UniqueRecordTwo, Truck, CustomerType
 
 def test_ignore_unique():
     assert UniqueRecord.add(u'test_ignore_unique')
@@ -366,3 +366,35 @@ def test_update():
     Car.update(c.id, year=2011)
     assert Car.count() == 1
     assert c.year == 2011
+
+def test_lookup_object():
+    CT = CustomerType
+    c1 = CT.add(label=u'one')
+    c2 = CT.add(label=u'two')
+    c3 = CT.add(label=u'three', active_flag=False)
+
+    eq_([c2, c1], CT.list_active(order_by=CT.id.desc()))
+    eq_([c1, c2], CT.list_active())
+    assert [c1, c3, c2] == CT.list_active(c3.id)
+
+    expect = [
+        (c2.id, u'two'),
+        (c1.id, u'one'),
+    ]
+    assert expect == CT.pairs_active(order_by=CT.id.desc())
+
+    expect = [
+        (c1.id, u'one'),
+        (c2.id, u'two'),
+    ]
+    eq_(expect, CT.pairs_active())
+
+    expect = [
+        (c1.id, u'one'),
+        (c3.id, u'three'),
+        (c2.id, u'two'),
+    ]
+    assert expect == CT.pairs_active(c3.id)
+
+    # test unique
+    assert not CT.add_iu(label=u'one')
