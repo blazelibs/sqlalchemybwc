@@ -288,7 +288,7 @@ def lookup_base(*args, **kwargs):
     """
         Lookups are simple data records with the standard declarative fields
         defined by DeclrativeMeta but with an additional two fields: label and
-        active_flag.  A list_active() class method is also available.
+        active_flag. Two "active" related class methods are also available.
     """
     kwargs.setdefault('cls', LookupBase)
     kwargs.setdefault('metaclass', LookupMeta)
