@@ -3,19 +3,19 @@ from datetime import datetime
 from blazeutils.helpers import tolist
 import savalidation as saval
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import DeclarativeMeta as saDeclarativeMeta
-from sqlalchemy.ext.declarative import declarative_base as sa_declarative_base
+import sqlalchemy.ext.declarative as sadec
 import sqlalchemy.orm as saorm
 import sqlalchemy.sql as sasql
 
 from plugstack.sqlalchemy import db
+from plugstack.sqlalchemy.lib.columns import SmallIntBool
 from plugstack.sqlalchemy.lib.decorators import one_to_none, transaction, \
     ignore_unique
 
-class DeclarativeMeta(saDeclarativeMeta):
+class DeclarativeMeta(sadec.DeclarativeMeta):
     def __init__(cls, classname, bases, dict_):
        cls._add_default_cols()
-       return saDeclarativeMeta.__init__(cls, classname, bases, dict_)
+       return sadec.DeclarativeMeta.__init__(cls, classname, bases, dict_)
 
     def _add_default_cols(cls):
         cls.id = sa.Column(sa.Integer, primary_key=True)
@@ -248,4 +248,48 @@ class DeclarativeBase(saval.DeclarativeBase):
 def declarative_base(*args, **kwargs):
     kwargs.setdefault('cls', DeclarativeBase)
     kwargs.setdefault('metaclass', DeclarativeMeta)
-    return sa_declarative_base(*args, **kwargs)
+    return sadec.declarative_base(*args, **kwargs)
+
+
+###
+### Lookup Functionality
+###
+class LookupMeta(DeclarativeMeta):
+    def _add_default_cols(cls):
+        DeclarativeMeta._add_default_cols(cls)
+        cls.label = sa.Column(sa.Unicode(255), nullable=False, unique=True)
+        cls.active_flag = sa.Column(SmallIntBool, nullable=False, server_default=sasql.text('1'))
+
+class LookupBase(DeclarativeBase):
+
+    @classmethod
+    def list_active(cls, include_ids=None, order_by=None):
+        if order_by is None:
+            order_by = cls.label
+        if include_ids:
+            include_ids = tolist(include_ids)
+            clause = sasql.or_(
+                cls.active_flag == 1,
+                cls.id.in_(include_ids)
+            )
+        else:
+            clause = cls.active_flag == 1
+        return cls.list_where(clause, order_by=order_by)
+
+    @classmethod
+    def pairs_active(cls, include_ids=None, order_by=None):
+        result = cls.list_active(include_ids, order_by=order_by)
+        return cls.pairs('id:label', _result=result)
+
+    def __repr__(self):
+        return '<%s %s:%s>' % (self.__class__.__name__, self.id, self.label)
+
+def lookup_base(*args, **kwargs):
+    """
+        Lookups are simple data records with the standard declarative fields
+        defined by DeclrativeMeta but with an additional two fields: label and
+        active_flag.  A list_active() class method is also available.
+    """
+    kwargs.setdefault('cls', LookupBase)
+    kwargs.setdefault('metaclass', LookupMeta)
+    return sadec.declarative_base(*args, **kwargs)

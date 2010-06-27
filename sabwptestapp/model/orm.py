@@ -2,10 +2,11 @@ import sqlalchemy as sa
 import sqlalchemy.sql as sasql
 
 from plugstack.sqlalchemy import db
-from plugstack.sqlalchemy.lib.declarative import declarative_base
+from plugstack.sqlalchemy.lib.declarative import declarative_base, lookup_base
 from plugstack.sqlalchemy.lib.decorators import ignore_unique, transaction
 
 Base = declarative_base(metadata=db.meta)
+LookupBase = lookup_base(metadata=db.meta)
 
 class UniqueRecord(Base):
     __tablename__ = 'sabwp_unique_records'
@@ -68,3 +69,6 @@ class Truck(Base):
         cls.add(make,  model)
 
 sa.Index('uidx_sabwp_truck_makemodel', Truck.make, Truck.model, unique=True)
+
+class CustomerType(LookupBase):
+    __tablename__ = 'sabwp_customer_types'
