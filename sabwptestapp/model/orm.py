@@ -5,6 +5,7 @@ import sqlalchemy.sql as sasql
 from plugstack.sqlalchemy import db
 from plugstack.sqlalchemy.lib.declarative import declarative_base, lookup_base
 from plugstack.sqlalchemy.lib.decorators import ignore_unique, transaction
+from plugstack.sqlalchemy.lib.validators import validates_unique
 
 Base = declarative_base(metadata=db.meta)
 LookupBase = lookup_base(metadata=db.meta)
@@ -75,3 +76,11 @@ sa.Index('uidx_sabwp_truck_makemodel', Truck.make, Truck.model, unique=True)
 
 class CustomerType(LookupBase):
     __tablename__ = 'sabwp_customer_types'
+
+class HasUniqueValidation(Base):
+    __tablename__ = 'sabwp_has_unique_val'
+
+    name = sa.Column(sa.String(255), nullable=False, unique=True)
+    email = sa.Column(sa.String(255), nullable=False, unique=True)
+
+    validates_unique('name', 'email')
