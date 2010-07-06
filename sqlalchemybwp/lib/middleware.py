@@ -1,6 +1,7 @@
 from blazeweb.globals import settings
 from blazeweb.hierarchy import visitmods
 from paste.registry import StackedObjectProxy
+from savalidation import ValidatingSessionExtension
 from sqlalchemy import engine_from_config, MetaData
 from sqlalchemy.orm import sessionmaker, scoped_session
 
@@ -11,7 +12,7 @@ class SQLAlchemyContainer(object):
     def __init__(self):
         self.engine = engine_from_config(dict(settings.db), prefix='')
         self.meta = MetaData()
-        self.Session = scoped_session(sessionmaker(bind=self.engine))
+        self.Session = scoped_session(sessionmaker(bind=self.engine, extension=ValidatingSessionExtension()))
 
     def get_session(self):
         return self.Session()
