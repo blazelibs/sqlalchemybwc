@@ -398,3 +398,7 @@ def test_lookup_object():
 
     # test unique
     assert not CT.add_iu(label=u'one')
+
+def test_sa_column_names():
+    assert CustomerType.sa_column_names() == ['id', 'createdts', 'updatedts', 'label', 'active_flag']
+    assert Truck.sa_column_names() == ['make', 'model', 'id', 'createdts', 'updatedts']

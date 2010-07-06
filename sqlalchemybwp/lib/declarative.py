@@ -12,10 +12,10 @@ from plugstack.sqlalchemy.lib.columns import SmallIntBool
 from plugstack.sqlalchemy.lib.decorators import one_to_none, transaction, \
     ignore_unique
 
-class DeclarativeMeta(sadec.DeclarativeMeta):
+class DeclarativeMeta(saval.DeclarativeMeta):
     def __init__(cls, classname, bases, dict_):
-       cls._add_default_cols()
-       return sadec.DeclarativeMeta.__init__(cls, classname, bases, dict_)
+        cls._add_default_cols()
+        return saval.DeclarativeMeta.__init__(cls, classname, bases, dict_)
 
     def _add_default_cols(cls):
         cls.id = sa.Column(sa.Integer, primary_key=True)
@@ -187,8 +187,7 @@ class DeclarativeBase(saval.DeclarativeBase):
         return db.sess.query(cls).filter(where_clause).count()
 
     def to_dict(self, exclude=[]):
-        col_prop_names = [p.key for p in self.__mapper__.iterate_properties \
-                                      if isinstance(p, saorm.ColumnProperty)]
+        col_prop_names = self.sa_column_names()
         data = dict([(name, getattr(self, name))
                      for name in col_prop_names if name not in exclude])
         return data
@@ -249,7 +248,6 @@ def declarative_base(*args, **kwargs):
     kwargs.setdefault('cls', DeclarativeBase)
     kwargs.setdefault('metaclass', DeclarativeMeta)
     return saval.declarative_base(*args, **kwargs)
-
 
 ###
 ### Lookup Functionality
