@@ -248,7 +248,7 @@ class DeclarativeBase(saval.DeclarativeBase):
 def declarative_base(*args, **kwargs):
     kwargs.setdefault('cls', DeclarativeBase)
     kwargs.setdefault('metaclass', DeclarativeMeta)
-    return sadec.declarative_base(*args, **kwargs)
+    return saval.declarative_base(*args, **kwargs)
 
 
 ###
@@ -292,4 +292,4 @@ def lookup_base(*args, **kwargs):
     """
     kwargs.setdefault('cls', LookupBase)
     kwargs.setdefault('metaclass', LookupMeta)
-    return sadec.declarative_base(*args, **kwargs)
+    return saval.declarative_base(*args, **kwargs)
