@@ -1,3 +1,4 @@
+from savalidation import validators as val
 import sqlalchemy as sa
 import sqlalchemy.sql as sasql
 
@@ -29,6 +30,8 @@ class UniqueRecordTwo(Base):
 
     name = sa.Column(sa.Unicode(255), nullable=False, unique=True)
     email = sa.Column(sa.Unicode(255), nullable=False, unique=True)
+
+    val.validates_constraints()
 
 class OneToNone(Base):
     __tablename__ = 'sabwp_onetonone_records'

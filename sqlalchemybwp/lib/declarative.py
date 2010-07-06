@@ -19,7 +19,7 @@ class DeclarativeMeta(sadec.DeclarativeMeta):
 
     def _add_default_cols(cls):
         cls.id = sa.Column(sa.Integer, primary_key=True)
-        cls.createdts = sa.Column(sa.DateTime, nullable=False, server_default=sasql.text('CURRENT_TIMESTAMP'))
+        cls.createdts = sa.Column(sa.DateTime, nullable=False, default=datetime.now, server_default=sasql.text('CURRENT_TIMESTAMP'))
         cls.updatedts = sa.Column(sa.DateTime, onupdate=datetime.now)
 
 class DeclarativeBase(saval.DeclarativeBase):
