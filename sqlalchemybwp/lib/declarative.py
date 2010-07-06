@@ -18,9 +18,18 @@ class DeclarativeMeta(saval.DeclarativeMeta):
         return saval.DeclarativeMeta.__init__(cls, classname, bases, dict_)
 
     def _add_default_cols(cls):
-        cls.id = sa.Column(sa.Integer, primary_key=True)
-        cls.createdts = sa.Column(sa.DateTime, nullable=False, default=datetime.now, server_default=sasql.text('CURRENT_TIMESTAMP'))
-        cls.updatedts = sa.Column(sa.DateTime, onupdate=datetime.now)
+        # this meta class in instantiated for DeclarativeBase as well as the
+        # the actual entity instances.  In order to be able to not have the
+        # default columns added, we can only add them when we know that the
+        # current class represents an entity and not a base class for an entity.
+        # We assume that only entities will have a table associated with them.
+        # this may not be a valid assumption, but will work for now until a
+        # use case can be devised where it won't work.
+        if hasattr(cls, '__tablename__') or hasattr(cls, '__table__'):
+            if getattr(cls, '__sabwp_default_cols__', True):
+                cls.id = sa.Column(sa.Integer, primary_key=True)
+                cls.createdts = sa.Column(sa.DateTime, nullable=False, default=datetime.now, server_default=sasql.text('CURRENT_TIMESTAMP'))
+                cls.updatedts = sa.Column(sa.DateTime, onupdate=datetime.now)
 
 class DeclarativeBase(saval.DeclarativeBase):
 
