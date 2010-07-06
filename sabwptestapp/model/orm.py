@@ -84,3 +84,11 @@ class HasUniqueValidation(Base):
     email = sa.Column(sa.String(255), nullable=False, unique=True)
 
     validates_unique('name', 'email')
+
+class NoDefaults(Base):
+    __tablename__ = 'sabwp_no_defs'
+    __sabwp_default_cols__ = False
+
+    myid = sa.Column(sa.Integer, primary_key=True)
+    name = sa.Column(sa.String(255))
+
