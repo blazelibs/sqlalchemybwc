@@ -25,7 +25,6 @@ class _UniqueValidator(formencode.validators.FancyValidator):
 class _UniqueValidationHandler(ValidationHandler):
     type = 'field'
     def add_validation_to_extension(self, field_names, fe_args, **kwargs):
-        print '--- add validation to extension'
         if not field_names:
             raise ValueError('validates_unique() must be passed at least one field name')
         for field_to_validate in field_names:
