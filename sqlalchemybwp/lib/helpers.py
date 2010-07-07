@@ -48,7 +48,7 @@ def clear_db():
         db.meta.reflect(bind=db.engine)
         for table in reversed(db.meta.sorted_tables):
             try:
-                db.engine.execute(table.delete())
+                table.drop(db.engine)
             except Exception, e:
                 if not 'no such table' in str(e):
                     raise
