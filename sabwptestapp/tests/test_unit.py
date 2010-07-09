@@ -4,7 +4,7 @@ from sqlalchemybwp.lib.decorators import one_to_none_ncm
 from sqlalchemybwp.lib.helpers import is_unique_exc, _is_unique_msg
 
 from sabwptestapp.model.orm import UniqueRecord, OneToNone, Car, \
-    UniqueRecordTwo, Truck, CustomerType, NoDefaults
+    UniqueRecordTwo, Truck, CustomerType, NoDefaults, declarative_base
 
 def test_ignore_unique():
     assert UniqueRecord.add(u'test_ignore_unique')
@@ -400,8 +400,13 @@ def test_lookup_object():
     assert not CT.add_iu(label=u'one')
 
 def test_sa_column_names():
-    assert CustomerType.sa_column_names() == ['id', 'createdts', 'updatedts', 'label', 'active_flag']
-    assert Truck.sa_column_names() == ['make', 'model', 'id', 'createdts', 'updatedts']
+    eq_(CustomerType.sa_column_names(), ['id', 'createdts', 'updatedts', 'active_flag', 'label'])
+    eq_(Truck.sa_column_names(), ['id', 'createdts', 'updatedts', 'make', 'model'])
 
 def test_no_default_columns():
     eq_(NoDefaults.sa_column_names(), ['myid', 'name'])
+
+def test_declarative_base():
+    Base1 = declarative_base()
+    Base2 = declarative_base()
+    assert Base1 is Base2
