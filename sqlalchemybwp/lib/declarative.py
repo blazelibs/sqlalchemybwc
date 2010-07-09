@@ -1,37 +1,25 @@
 from datetime import datetime
 
 from blazeutils.helpers import tolist
+from blazeweb.globals import ag
 import savalidation as saval
 import sqlalchemy as sa
 import sqlalchemy.ext.declarative as sadec
 import sqlalchemy.orm as saorm
 import sqlalchemy.sql as sasql
+from sqlalchemy.util import classproperty
 
 from plugstack.sqlalchemy import db
 from plugstack.sqlalchemy.lib.columns import SmallIntBool
 from plugstack.sqlalchemy.lib.decorators import one_to_none, transaction, \
     ignore_unique
 
-class DeclarativeMeta(saval.DeclarativeMeta):
-    def __init__(cls, classname, bases, dict_):
-        cls._add_default_cols()
-        return saval.DeclarativeMeta.__init__(cls, classname, bases, dict_)
+class DefaultColsMixin(object):
+    id = sa.Column(sa.Integer, primary_key=True)
+    createdts = sa.Column(sa.DateTime, nullable=False, default=datetime.now, server_default=sasql.text('CURRENT_TIMESTAMP'))
+    updatedts = sa.Column(sa.DateTime, onupdate=datetime.now)
 
-    def _add_default_cols(cls):
-        # this meta class in instantiated for DeclarativeBase as well as the
-        # the actual entity instances.  In order to be able to not have the
-        # default columns added, we can only add them when we know that the
-        # current class represents an entity and not a base class for an entity.
-        # We assume that only entities will have a table associated with them.
-        # this may not be a valid assumption, but will work for now until a
-        # use case can be devised where it won't work.
-        if hasattr(cls, '__tablename__') or hasattr(cls, '__table__'):
-            if getattr(cls, '__sabwp_default_cols__', True):
-                cls.id = sa.Column(sa.Integer, primary_key=True)
-                cls.createdts = sa.Column(sa.DateTime, nullable=False, default=datetime.now, server_default=sasql.text('CURRENT_TIMESTAMP'))
-                cls.updatedts = sa.Column(sa.DateTime, onupdate=datetime.now)
-
-class DeclarativeBase(saval.DeclarativeBase):
+class MethodsMixin(object):
 
     @transaction
     def add(cls, **kwargs):
@@ -253,21 +241,32 @@ class DeclarativeBase(saval.DeclarativeBase):
             return clause
         return sasql.and_(clause, *extra_clauses)
 
+    @classmethod
+    def sa_column_names(self):
+        return [p.key for p in self.__mapper__.iterate_properties \
+                                      if isinstance(p, saorm.ColumnProperty)]
+
+class AllMixin(saval.ValidationMixin, DefaultColsMixin, MethodsMixin):
+    pass
+
 def declarative_base(*args, **kwargs):
-    kwargs.setdefault('cls', DeclarativeBase)
-    kwargs.setdefault('metaclass', DeclarativeMeta)
-    return saval.declarative_base(*args, **kwargs)
+    """
+        creates a Base class for declarative objects or returns the class that
+        has allready been created for the current application instance.
+    """
+    if not hasattr(ag, 'sabwp_declarative_base'):
+        kwargs.setdefault('metadata', db.meta)
+        ag.sabwp_declarative_base = saval.declarative_base(*args, **kwargs)
+    return ag.sabwp_declarative_base
 
 ###
 ### Lookup Functionality
 ###
-class LookupMeta(DeclarativeMeta):
-    def _add_default_cols(cls):
-        DeclarativeMeta._add_default_cols(cls)
-        cls.label = sa.Column(sa.Unicode(255), nullable=False, unique=True)
-        cls.active_flag = sa.Column(SmallIntBool, nullable=False, server_default=sasql.text('1'))
-
-class LookupBase(DeclarativeBase):
+class LookupMixin(AllMixin):
+    @classproperty
+    def label(cls):
+        return sa.Column(sa.Unicode(255), nullable=False, unique=True)
+    active_flag = sa.Column(SmallIntBool, nullable=False, server_default=sasql.text('1'))
 
     @classmethod
     def list_active(cls, include_ids=None, order_by=None):
@@ -290,13 +289,3 @@ class LookupBase(DeclarativeBase):
 
     def __repr__(self):
         return '<%s %s:%s>' % (self.__class__.__name__, self.id, self.label)
-
-def lookup_base(*args, **kwargs):
-    """
-        Lookups are simple data records with the standard declarative fields
-        defined by DeclrativeMeta but with an additional two fields: label and
-        active_flag. Two "active" related class methods are also available.
-    """
-    kwargs.setdefault('cls', LookupBase)
-    kwargs.setdefault('metaclass', LookupMeta)
-    return saval.declarative_base(*args, **kwargs)

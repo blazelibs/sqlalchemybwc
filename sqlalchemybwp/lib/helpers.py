@@ -43,7 +43,7 @@ def clear_db():
         rows = db.engine.execute(sql)
         for row in rows:
             db.engine.execute('drop view %s' % row['name'])
-
+        
         # drop the tables
         db.meta.reflect(bind=db.engine)
         for table in reversed(db.meta.sorted_tables):

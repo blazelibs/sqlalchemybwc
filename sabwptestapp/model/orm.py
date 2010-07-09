@@ -1,16 +1,16 @@
-from savalidation import validators as val
+from savalidation import validators as val, ValidationMixin
 import sqlalchemy as sa
 import sqlalchemy.sql as sasql
 
 from plugstack.sqlalchemy import db
-from plugstack.sqlalchemy.lib.declarative import declarative_base, lookup_base
+from plugstack.sqlalchemy.lib.declarative import declarative_base, AllMixin, \
+    LookupMixin, MethodsMixin
 from plugstack.sqlalchemy.lib.decorators import ignore_unique, transaction
 from plugstack.sqlalchemy.lib.validators import validates_unique
 
-Base = declarative_base(metadata=db.meta)
-LookupBase = lookup_base(metadata=db.meta)
+Base = declarative_base()
 
-class UniqueRecord(Base):
+class UniqueRecord(Base, AllMixin):
     __tablename__ = 'sabwp_unique_records'
 
     name = sa.Column(sa.Unicode(255), nullable=False, unique=True)
@@ -26,7 +26,7 @@ class UniqueRecord(Base):
     def add_iu(cls, name):
         cls.add(name)
 
-class UniqueRecordTwo(Base):
+class UniqueRecordTwo(Base, AllMixin):
     __tablename__ = 'sabwp_unique_records_two'
 
     name = sa.Column(sa.Unicode(255), nullable=False, unique=True)
@@ -34,7 +34,7 @@ class UniqueRecordTwo(Base):
 
     val.validates_constraints()
 
-class OneToNone(Base):
+class OneToNone(Base, AllMixin):
     __tablename__ = 'sabwp_onetonone_records'
 
     ident = sa.Column(sa.Unicode(255), nullable=False)
@@ -46,7 +46,7 @@ class OneToNone(Base):
         db.sess.add(o)
         return o
 
-class Car(Base):
+class Car(Base, AllMixin):
     __tablename__ = 'sabwp_cars'
 
     make = sa.Column(sa.Unicode(255), nullable=False)
@@ -56,7 +56,7 @@ class Car(Base):
     def __repr__(self):
         return '<Car %s, %s, %s>' % (self.make, self.model, self.year)
 
-class Truck(Base):
+class Truck(Base, AllMixin):
     __tablename__ = 'sabwp_trucks'
 
     make = sa.Column(sa.Unicode(255), nullable=False)
@@ -74,10 +74,10 @@ class Truck(Base):
 
 sa.Index('uidx_sabwp_truck_makemodel', Truck.make, Truck.model, unique=True)
 
-class CustomerType(LookupBase):
+class CustomerType(Base, LookupMixin):
     __tablename__ = 'sabwp_customer_types'
 
-class HasUniqueValidation(Base):
+class HasUniqueValidation(Base, AllMixin):
     __tablename__ = 'sabwp_has_unique_val'
 
     name = sa.Column(sa.String(255), nullable=False, unique=True)
@@ -85,10 +85,8 @@ class HasUniqueValidation(Base):
 
     validates_unique('name', 'email')
 
-class NoDefaults(Base):
+class NoDefaults(Base, MethodsMixin):
     __tablename__ = 'sabwp_no_defs'
-    __sabwp_default_cols__ = False
 
     myid = sa.Column(sa.Integer, primary_key=True)
     name = sa.Column(sa.String(255))
-
