@@ -3,14 +3,14 @@ import sqlalchemy as sa
 import sqlalchemy.sql as sasql
 
 from plugstack.sqlalchemy import db
-from plugstack.sqlalchemy.lib.declarative import declarative_base, AllMixin, \
+from plugstack.sqlalchemy.lib.declarative import declarative_base, DefaultMixin, \
     LookupMixin, MethodsMixin
 from plugstack.sqlalchemy.lib.decorators import ignore_unique, transaction
 from plugstack.sqlalchemy.lib.validators import validates_unique
 
 Base = declarative_base()
 
-class UniqueRecord(Base, AllMixin):
+class UniqueRecord(Base, DefaultMixin):
     __tablename__ = 'sabwp_unique_records'
 
     name = sa.Column(sa.Unicode(255), nullable=False, unique=True)
@@ -26,7 +26,7 @@ class UniqueRecord(Base, AllMixin):
     def add_iu(cls, name):
         cls.add(name)
 
-class UniqueRecordTwo(Base, AllMixin):
+class UniqueRecordTwo(Base, DefaultMixin):
     __tablename__ = 'sabwp_unique_records_two'
 
     name = sa.Column(sa.Unicode(255), nullable=False, unique=True)
@@ -34,7 +34,7 @@ class UniqueRecordTwo(Base, AllMixin):
 
     val.validates_constraints()
 
-class OneToNone(Base, AllMixin):
+class OneToNone(Base, DefaultMixin):
     __tablename__ = 'sabwp_onetonone_records'
 
     ident = sa.Column(sa.Unicode(255), nullable=False)
@@ -46,7 +46,7 @@ class OneToNone(Base, AllMixin):
         db.sess.add(o)
         return o
 
-class Car(Base, AllMixin):
+class Car(Base, DefaultMixin):
     __tablename__ = 'sabwp_cars'
 
     make = sa.Column(sa.Unicode(255), nullable=False)
@@ -56,7 +56,7 @@ class Car(Base, AllMixin):
     def __repr__(self):
         return '<Car %s, %s, %s>' % (self.make, self.model, self.year)
 
-class Truck(Base, AllMixin):
+class Truck(Base, DefaultMixin):
     __tablename__ = 'sabwp_trucks'
 
     make = sa.Column(sa.Unicode(255), nullable=False)
@@ -77,7 +77,7 @@ sa.Index('uidx_sabwp_truck_makemodel', Truck.make, Truck.model, unique=True)
 class CustomerType(Base, LookupMixin):
     __tablename__ = 'sabwp_customer_types'
 
-class HasUniqueValidation(Base, AllMixin):
+class HasUniqueValidation(Base, DefaultMixin):
     __tablename__ = 'sabwp_has_unique_val'
 
     name = sa.Column(sa.String(255), nullable=False, unique=True)
