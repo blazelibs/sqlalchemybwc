@@ -246,7 +246,7 @@ class MethodsMixin(object):
         return [p.key for p in self.__mapper__.iterate_properties \
                                       if isinstance(p, saorm.ColumnProperty)]
 
-class AllMixin(saval.ValidationMixin, DefaultColsMixin, MethodsMixin):
+class DefaultMixin(saval.ValidationMixin, DefaultColsMixin, MethodsMixin):
     pass
 
 def declarative_base(*args, **kwargs):
@@ -262,7 +262,7 @@ def declarative_base(*args, **kwargs):
 ###
 ### Lookup Functionality
 ###
-class LookupMixin(AllMixin):
+class LookupMixin(DefaultMixin):
     @classproperty
     def label(cls):
         return sa.Column(sa.Unicode(255), nullable=False, unique=True)
