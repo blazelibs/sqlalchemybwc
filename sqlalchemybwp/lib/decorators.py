@@ -1,3 +1,11 @@
+"""
+    It is expected that most of these decorators will be used on entity class
+    methods.  When using them on a regular function, use the decorator with the
+    "ncm" postfix:
+
+        ncm => Non-Class Method
+"""
+
 from decorator import decorator
 from sqlalchemy.orm.exc import NoResultFound
 
