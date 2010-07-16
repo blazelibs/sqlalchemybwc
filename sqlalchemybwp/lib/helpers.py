@@ -24,6 +24,23 @@ def _is_unique_msg(dialect, msg):
         raise ValueError('is_unique_exc() does not yet support dialect: %s' % dialect)
     return False
 
+def is_fk_exc(exc, field_name):
+    if not isinstance(exc, IntegrityError):
+        return False
+    return _is_fk_msg(db.engine.dialect.name, str(exc), field_name)
+
+def _is_fk_msg(dialect, msg, field_name):
+    """
+        easier unit testing this way
+    """
+    if dialect == 'sqlite':
+        if 'violates foreign key constraint' in msg and field_name in msg:
+            return True
+    else:
+        raise ValueError('is_fk_exc() does not yet support dialect: %s' % dialect)
+    return False
+
+
 def clear_db():
     if db.engine.dialect.name == 'postgresql':
         sql = []
@@ -43,7 +60,7 @@ def clear_db():
         rows = db.engine.execute(sql)
         for row in rows:
             db.engine.execute('drop view %s' % row['name'])
-        
+
         # drop the tables
         db.meta.reflect(bind=db.engine)
         for table in reversed(db.meta.sorted_tables):
