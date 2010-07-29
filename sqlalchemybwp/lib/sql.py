@@ -1,25 +1,21 @@
-"""
+from blazeweb.hierarchy import findfile
+from plugstack.sqlalchemy import db
 
-NOT READY YET, DON'T USE
+def run_plugin_sql(plugin, target, use_dialect=False):
+    ''' used to run SQL from files in a plugin's "sql" directory:
 
-"""
+            run_plugin_sql('myplugin', 'create_views')
 
+        will run the file "/plugins/myplugin/sql/create_views.sql"
 
-def run_module_sql(module, target, use_dialect=False):
-    ''' used to run SQL from files in a modules "sql" directory:
-
-            run_module_sql('mymod', 'create_views')
-
-        will run the file "<myapp>/modules/mymod/sql/create_views.sql"
-
-            run_module_sql('mymod', 'create_views', True)
+            run_plugin_sql('myplugin', 'create_views', True)
 
         will run the files:
 
             # sqlite DB
-            <myapp>/modules/mymod/sql/create_views.sqlite.sql
+            /plugins/myplugin/sql/create_views.sqlite.sql
             # postgres DB
-            <myapp>/modules/mymod/sql/create_views.pgsql.sql
+            /plugins/myplugin/sql/create_views.pgsql.sql
             ...
 
         The dialect prefix used is the same as the sqlalchemy prefix.
@@ -29,10 +25,10 @@ def run_module_sql(module, target, use_dialect=False):
 
     '''
     if use_dialect:
-        relative_sql_path = 'modules/%s/sql/%s.%s.sql' % (module, target, db.engine.dialect.name )
+        relative_sql_path = 'sql/%s.%s.sql' % (target, db.engine.dialect.name)
     else:
-        relative_sql_path = 'modules/%s/sql/%s.sql' % (module, target )
-    _run_sql(relative_sql_path)
+        relative_sql_path = 'sql/%s.sql' % (target)
+    _run_sql('%s:%s'%(plugin,relative_sql_path))
 
 def run_app_sql(target, use_dialect=False):
     ''' used to run SQL from files in an apps "sql" directory:
@@ -46,9 +42,9 @@ def run_app_sql(target, use_dialect=False):
         will run the files:
 
             # sqlite DB
-            <myapp>/sql/test_setup.sqlite.sql
+            /sql/test_setup.sqlite.sql
             # postgres DB
-            <myapp>/sql/test_setup.pgsql.sql
+            /sql/test_setup.pgsql.sql
             ...
 
         The dialect prefix used is the same as the sqlalchemy prefix.
@@ -65,8 +61,7 @@ def run_app_sql(target, use_dialect=False):
     _run_sql(relative_sql_path)
 
 def _run_sql(relative_sql_path):
-    from blazeweb.globals import appfilepath
-    full_path = appfilepath(relative_sql_path)
+    full_path = findfile(relative_sql_path)
 
     sqlfile = file(full_path)
     sql = sqlfile.read()
