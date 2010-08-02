@@ -294,5 +294,9 @@ class LookupMixin(DefaultMixin):
         result = cls.list_active(include_ids, order_by=order_by)
         return cls.pairs('id:label', _result=result)
 
+    @classmethod
+    def get_by_label(cls, label):
+        return cls.get_by(label=label)
+
     def __repr__(self):
         return '<%s %s:%s>' % (self.__class__.__name__, self.id, self.label)
