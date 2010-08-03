@@ -1,8 +1,13 @@
+from savalidation import ValidationError
 from sqlalchemy.exc import IntegrityError
 
 from plugstack.sqlalchemy import db
 
 def is_unique_exc(exc):
+    if isinstance(exc, ValidationError):
+        if len(exc.invalid_instances) == 1 and len(exc.invalid_instances[0].validation_errors) == 1 \
+            and 'unique' in exc.invalid_instances[0].validation_errors.values[0]:
+            return True
     if not isinstance(exc, IntegrityError):
         return False
     return _is_unique_msg(db.engine.dialect.name, str(exc))
