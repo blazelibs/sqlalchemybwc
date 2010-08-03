@@ -1,0 +1,1 @@
+default$ nosetests --nologcapture -x --with-coverage --cover-package=sqlalchemybwp --cover-html --cover-erase sabwptestapp/ --blazeweb-package=sabwptestapp
