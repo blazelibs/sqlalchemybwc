@@ -305,6 +305,9 @@ def test_lists_pairs_firsts():
     result = Car.pairs_where('model:year', Car.model == u'count', order_by=Car.year.desc())
     eq_(expect, result)
 
+    result = Car.pairs_where('model:year', Car.model == u'we-need-an-empty-list', order_by=Car.year.desc())
+    eq_([], result)
+
     ###
     ### test firsts
     ###
