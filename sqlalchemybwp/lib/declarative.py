@@ -131,7 +131,7 @@ class MethodsMixin(object):
             order_by = order_by clause or iterable of order_by clauses
         """
         key_field_name, value_field_name = fields.split(':')
-        if not _result:
+        if _result is None:
             _result = cls.list(order_by)
         retval = []
         for obj in _result:
@@ -149,7 +149,8 @@ class MethodsMixin(object):
     @classmethod
     def pairs_where(cls, fields, clause, *extra_clauses, **kwargs):
         result = cls.list_where(clause, *extra_clauses, **kwargs)
-        return cls.pairs(fields, _result=result)
+        pairs = cls.pairs(fields, _result=result)
+        return pairs
 
     @transaction
     def delete(cls, oid):
