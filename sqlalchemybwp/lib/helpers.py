@@ -1,3 +1,4 @@
+from blazeutils import tolist
 from savalidation import ValidationError
 from sqlalchemy.exc import IntegrityError
 
@@ -5,9 +6,7 @@ from plugstack.sqlalchemy import db
 
 def is_unique_exc(exc):
     if isinstance(exc, ValidationError):
-        if len(exc.invalid_instances) == 1 and len(exc.invalid_instances[0].validation_errors) == 1 \
-            and 'unique' in exc.invalid_instances[0].validation_errors.values[0]:
-            return True
+        return len(exc.invalid_instances) == 1 and _is_unique_error_saval(exc.invalid_instances[0].validation_errors)
     if not isinstance(exc, IntegrityError):
         return False
     return _is_unique_msg(db.engine.dialect.name, str(exc))
@@ -28,6 +27,15 @@ def _is_unique_msg(dialect, msg):
     else:
         raise ValueError('is_unique_exc() does not yet support dialect: %s' % dialect)
     return False
+
+def _is_unique_error_saval(validation_errors):
+    if not len(validation_errors):
+        return False
+    for field, error_msgs in validation_errors.items():
+        for err in tolist(error_msgs):
+            if 'unique' not in err:
+                return False
+    return True
 
 def is_fk_exc(exc, field_name):
     if not isinstance(exc, IntegrityError):
