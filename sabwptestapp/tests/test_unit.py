@@ -1,7 +1,7 @@
 from nose.tools import eq_
 from sqlalchemybwp import db
 from sqlalchemybwp.lib.decorators import one_to_none_ncm
-from sqlalchemybwp.lib.helpers import is_unique_exc, _is_unique_msg
+from sqlalchemybwp.lib.helpers import is_unique_exc, _is_unique_msg, _is_unique_error_saval
 
 from sabwptestapp.model.orm import UniqueRecord, OneToNone, Car, \
     UniqueRecordTwo, Truck, CustomerType, NoDefaults, declarative_base
@@ -156,6 +156,20 @@ def test_is_unique_msg():
     for k,v in totest.iteritems():
         for msg in v:
             yield dotest, k, msg
+
+def test_is_unique_error_saval():
+    totest = [
+        ({}, False),
+        ({'label': 'not unique'}, True),
+        ({'label': 'max size exceeded'}, False),
+        ({'label': 'max size exceeded', 'name': 'not unique'}, False),
+        ({'label': 'not unique', 'name': 'not unique'}, True),
+        ({'label': ['max size exceeded', 'not unique']}, False),
+    ]
+    def dotest(validation_errors, return_val):
+        assert _is_unique_error_saval(validation_errors) == return_val, 'expected %s for %s' % (return_val, validation_errors)
+    for test_case in totest:
+        yield dotest, test_case[0], test_case[1]
 
 def test_delete():
     c = Car.add(**{
