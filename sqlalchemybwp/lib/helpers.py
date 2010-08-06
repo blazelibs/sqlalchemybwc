@@ -49,10 +49,29 @@ def _is_fk_msg(dialect, msg, field_name):
     if dialect == 'sqlite':
         if 'violates foreign key constraint' in msg and field_name in msg:
             return True
+    elif dialect == 'mssql':
+        # mssql does not use the field name in FK error messages
+        if 'FOREIGN KEY constraint' in msg:
+            return True
     else:
         raise ValueError('is_fk_exc() does not yet support dialect: %s' % dialect)
     return False
 
+def is_null_exc(exc, field_name):
+    if not isinstance(exc, IntegrityError):
+        return False
+    return _is_null_msg(db.engine.dialect.name, str(exc), field_name)
+    
+def _is_null_msg(dialect, msg, field_name):
+    """
+        easier unit testing this way
+    """
+    if dialect == 'mssql':
+        if 'Cannot insert the value NULL' in msg and msg.count(field_name) == 2:
+            return True
+    else:
+        raise ValueError('is_null_exc() does not yet support dialect: %s' % dialect)
+    return False
 
 def clear_db():
     if db.engine.dialect.name == 'postgresql':
