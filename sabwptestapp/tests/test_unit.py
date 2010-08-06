@@ -319,6 +319,9 @@ def test_lists_pairs_firsts():
     result = Car.pairs_where('model:year', Car.model == u'count', order_by=Car.year.desc())
     eq_(expect, result)
 
+    result = Car.pairs_where('model:year', Car.model == u'we-need-an-empty-list', order_by=Car.year.desc())
+    eq_([], result)
+
     ###
     ### test firsts
     ###
@@ -384,8 +387,8 @@ def test_update():
 def test_lookup_object():
     CT = CustomerType
     c1 = CT.add(label=u'one')
-    c2 = CT.add(label=u'two')
-    c3 = CT.add(label=u'three', active_flag=False)
+    c2 = CT.test_create(u'two')
+    c3 = CT.test_create(u'three', False)
 
     eq_([c2, c1], CT.list_active(order_by=CT.id.desc()))
     eq_([c1, c2], CT.list_active())
