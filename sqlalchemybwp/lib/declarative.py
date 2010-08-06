@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from blazeutils.helpers import tolist
+from blazeutils.strings import randchars
 from blazeweb.globals import ag
 import savalidation as saval
 import sqlalchemy as sa
@@ -130,7 +131,7 @@ class MethodsMixin(object):
             order_by = order_by clause or iterable of order_by clauses
         """
         key_field_name, value_field_name = fields.split(':')
-        if not _result:
+        if _result is None:
             _result = cls.list(order_by)
         retval = []
         for obj in _result:
@@ -148,7 +149,8 @@ class MethodsMixin(object):
     @classmethod
     def pairs_where(cls, fields, clause, *extra_clauses, **kwargs):
         result = cls.list_where(clause, *extra_clauses, **kwargs)
-        return cls.pairs(fields, _result=result)
+        pairs = cls.pairs(fields, _result=result)
+        return pairs
 
     @transaction
     def delete(cls, oid):
@@ -269,6 +271,12 @@ class LookupMixin(DefaultMixin):
     active_flag = sa.Column(SmallIntBool, nullable=False, server_default=sasql.text('1'))
 
     @classmethod
+    def test_create(cls, label=None, active=True):
+        if label is None:
+            label = u'%s %s' % (cls.__name__, randchars(5))
+        return cls.add(label=label, active_flag=active)
+
+    @classmethod
     def list_active(cls, include_ids=None, order_by=None):
         if order_by is None:
             order_by = cls.label
@@ -286,6 +294,10 @@ class LookupMixin(DefaultMixin):
     def pairs_active(cls, include_ids=None, order_by=None):
         result = cls.list_active(include_ids, order_by=order_by)
         return cls.pairs('id:label', _result=result)
+
+    @classmethod
+    def get_by_label(cls, label):
+        return cls.get_by(label=label)
 
     def __repr__(self):
         return '<%s %s:%s>' % (self.__class__.__name__, self.id, self.label)
