@@ -13,6 +13,8 @@ class Default(DefaultSettings):
 
         self.add_plugin(app_package, 'sqlalchemy', 'sqlalchemybwp')
 
+        self.add_route('/', 'Index')
+
 class Dev(Default):
     def init(self):
         Default.init(self)
@@ -30,6 +32,15 @@ class Test(Default):
         # uncomment this if you want to use a database you can inspect
         #from os import path
         #self.db.url = 'sqlite:///%s' % path.join(self.dirs.data, 'test_application.db')
+
+class SplitSessionsTest(Default):
+    def init(self):
+        Default.init(self)
+        self.apply_test_settings()
+
+        self.db.url = 'sqlite://'
+
+        self.plugins.sqlalchemy.use_split_sessions = True
 
 try:
     from site_settings import *
