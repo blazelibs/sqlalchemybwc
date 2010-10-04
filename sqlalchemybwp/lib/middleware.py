@@ -37,7 +37,9 @@ class SQLAlchemyApp(object):
         self.container = SQLAlchemyContainer()
         db._push_object(self.container)
         visitmods('model.orm')
+        visitmods('model.entities')
         visitmods('model.metadata')
+        visitmods('model.schema')
 
     def __call__(self, environ, start_response):
         # clear the session after every response cycle
