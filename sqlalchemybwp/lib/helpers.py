@@ -47,15 +47,20 @@ def _is_fk_msg(dialect, msg, field_name):
         easier unit testing this way
     """
     if dialect == 'sqlite':
-        # this test assumes sqlite foreign keys created by SQLiteFKTG4SA
+        # this test assumes sqlite foreign keys created by SQLiteFKTG4SA.  The
+        # reason the field name is in the msg is because SQLiteFKTG4SA uses
+        # the field name as part of the constraint name
         if 'violates foreign key constraint' in msg and field_name in msg:
             return True
     elif dialect == 'postgresql':
-        if 'violates foreign key constraint' in msg and 'Key (%s)' % field_name in msg:
+        # postgresql does not have the field name in the message when the
+        # record referenced by a FK is deleted, so don't check for field_name
+        # here
+        if 'violates foreign key constraint' in msg:
             return True
     elif dialect == 'mssql':
         # this test assumes MSSQL 2005
-        if 'conflicted with the FOREIGN KEY constraint' in msg and "column 'protected_entity_id'" in msg:
+        if ('conflicted with the FOREIGN KEY constraint' in msg or 'conflicted with the REFERENCE constraint' in msg) and "column 'protected_entity_id'" in msg:
             return True
     else:
         raise ValueError('is_fk_exc() does not yet support dialect: %s' % dialect)

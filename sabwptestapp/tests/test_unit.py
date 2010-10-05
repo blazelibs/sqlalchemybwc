@@ -183,12 +183,15 @@ def test_is_fk_msg():
     totest = {
         'sqlite': [
             '(IntegrityError) insert on table "permissions" violates foreign key constraint "permissions__protected_entity_id__fki__applications__id__auto"'
+            """(IntegrityError) delete on table "applications" violates foreign key constraint "permissions__protected_entity_id__fkd__applications__id__auto" u'DELETE FROM applications WHERE applications.id = ?' (1,)"""
         ],
         'postgresql':[
             '(IntegrityError) insert or update on table "permissions" violates foreign key constraint "permissions_protected_entity_id_fkey" DETAIL:  Key (protected_entity_id)=(1000) is not present in table "applications".'
+            '(IntegrityError) update or delete on table "applications" violates foreign key constraint "permissions_protected_entity_id_fkey" on table "permissions"  DETAIL:  Key (id)=(4) is still referenced from table "permissions".'
         ],
         'mssql': [
             """The INSERT statement conflicted with the FOREIGN KEY constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.permissions", column 'protected_entity_id'.""",
+            """The DELETE statement conflicted with the REFERENCE constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.permissions", column 'protected_entity_id'."""
 
         ]
     }
