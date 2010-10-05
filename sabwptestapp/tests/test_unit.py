@@ -1,7 +1,8 @@
 from nose.tools import eq_
 from sqlalchemybwp import db
 from sqlalchemybwp.lib.decorators import one_to_none_ncm
-from sqlalchemybwp.lib.helpers import is_unique_exc, _is_unique_msg, _is_unique_error_saval
+from sqlalchemybwp.lib.helpers import is_unique_exc, _is_unique_msg, \
+    _is_unique_error_saval, _is_null_msg, _is_fk_msg
 
 from sabwptestapp.model.orm import UniqueRecord, OneToNone, Car, \
     UniqueRecordTwo, Truck, CustomerType, NoDefaults, declarative_base
@@ -153,6 +154,46 @@ def test_is_unique_msg():
     }
     def dotest(dialect, msg):
         assert _is_unique_msg(dialect, msg)
+    for k,v in totest.iteritems():
+        for msg in v:
+            yield dotest, k, msg
+
+def test_is_null_msg():
+    totest = {
+        'sqlite': [
+            "(IntegrityError) permissions.name may not be NULL u'INSERT INTO permissions..."
+        ],
+        'postgresql':[
+            '(IntegrityError) null value in column "name" violates not-null constraint...'
+        ],
+        'mssql': [
+            #"""The INSERT statement conflicted with the FOREIGN KEY constraint "fk_some_constraint_name". The conflict occurred in database "TestDB", table "dbo.permissions", column 'name'.""",
+            """Cannot insert the value NULL into column 'name', table 'TestDB.dbo.permissions'; column does not allow nulls. INSERT fails.""",
+            """Cannot insert the value NULL into column 'name', table 'TestDB.dbo.permissions'; column does not allow nulls. UPDATE fails.""",
+
+        ]
+    }
+    def dotest(dialect, msg):
+        assert _is_null_msg(dialect, msg, u'name')
+    for k,v in totest.iteritems():
+        for msg in v:
+            yield dotest, k, msg
+
+def test_is_fk_msg():
+    totest = {
+        'sqlite': [
+            '(IntegrityError) insert on table "permissions" violates foreign key constraint "permissions__protected_entity_id__fki__applications__id__auto"'
+        ],
+        'postgresql':[
+            '(IntegrityError) insert or update on table "permissions" violates foreign key constraint "permissions_protected_entity_id_fkey" DETAIL:  Key (protected_entity_id)=(1000) is not present in table "applications".'
+        ],
+        'mssql': [
+            """The INSERT statement conflicted with the FOREIGN KEY constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.permissions", column 'protected_entity_id'.""",
+
+        ]
+    }
+    def dotest(dialect, msg):
+        assert _is_fk_msg(dialect, msg, 'protected_entity_id')
     for k,v in totest.iteritems():
         for msg in v:
             yield dotest, k, msg

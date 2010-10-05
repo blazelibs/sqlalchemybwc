@@ -47,11 +47,15 @@ def _is_fk_msg(dialect, msg, field_name):
         easier unit testing this way
     """
     if dialect == 'sqlite':
+        # this test assumes sqlite foreign keys created by SQLiteFKTG4SA
         if 'violates foreign key constraint' in msg and field_name in msg:
             return True
+    elif dialect == 'postgresql':
+        if 'violates foreign key constraint' in msg and 'Key (%s)' % field_name in msg:
+            return True
     elif dialect == 'mssql':
-        # mssql does not use the field name in FK error messages
-        if 'FOREIGN KEY constraint' in msg:
+        # this test assumes MSSQL 2005
+        if 'conflicted with the FOREIGN KEY constraint' in msg and "column 'protected_entity_id'" in msg:
             return True
     else:
         raise ValueError('is_fk_exc() does not yet support dialect: %s' % dialect)
@@ -61,13 +65,19 @@ def is_null_exc(exc, field_name):
     if not isinstance(exc, IntegrityError):
         return False
     return _is_null_msg(db.engine.dialect.name, str(exc), field_name)
-    
+
 def _is_null_msg(dialect, msg, field_name):
     """
         easier unit testing this way
     """
     if dialect == 'mssql':
-        if 'Cannot insert the value NULL' in msg and msg.count(field_name) == 2:
+        if 'Cannot insert the value NULL into column \'%s\'' % field_name in msg:
+            return True
+    elif dialect == 'sqlite':
+        if '.%s may not be NULL' % field_name in msg:
+            return True
+    elif dialect == 'postgresql':
+        if 'null value in column "%s" violates not-null constraint' % field_name in msg:
             return True
     else:
         raise ValueError('is_null_exc() does not yet support dialect: %s' % dialect)
