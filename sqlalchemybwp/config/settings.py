@@ -1,6 +1,6 @@
-from blazeweb.config import PluginSettings
+from blazeweb.config import ComponentSettings
 
-class Settings(PluginSettings):
+class Settings(ComponentSettings):
     def init(self):
         self.for_me.pre_test_init_event_enabled = True
         self.for_me.pre_test_clear_data_only = False

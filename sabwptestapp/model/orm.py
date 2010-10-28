@@ -2,11 +2,11 @@ from savalidation import validators as val, ValidationMixin
 import sqlalchemy as sa
 import sqlalchemy.sql as sasql
 
-from plugstack.sqlalchemy import db
-from plugstack.sqlalchemy.lib.declarative import declarative_base, DefaultMixin, \
+from compstack.sqlalchemy import db
+from compstack.sqlalchemy.lib.declarative import declarative_base, DefaultMixin, \
     LookupMixin, MethodsMixin
-from plugstack.sqlalchemy.lib.decorators import ignore_unique, transaction
-from plugstack.sqlalchemy.lib.validators import validates_unique
+from compstack.sqlalchemy.lib.decorators import ignore_unique, transaction
+from compstack.sqlalchemy.lib.validators import validates_unique
 
 Base = declarative_base()
 

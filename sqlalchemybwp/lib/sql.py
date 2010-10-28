@@ -1,21 +1,21 @@
 from blazeweb.hierarchy import findfile
-from plugstack.sqlalchemy import db
+from compstack.sqlalchemy import db
 
-def run_plugin_sql(plugin, target, use_dialect=False):
-    ''' used to run SQL from files in a plugin's "sql" directory:
+def run_component_sql(component, target, use_dialect=False):
+    ''' used to run SQL from files in a component's "sql" directory:
 
-            run_plugin_sql('myplugin', 'create_views')
+            run_component_sql('mycomponent', 'create_views')
 
-        will run the file "/plugins/myplugin/sql/create_views.sql"
+        will run the file "/components/mycomponent/sql/create_views.sql"
 
-            run_plugin_sql('myplugin', 'create_views', True)
+            run_component_sql('mycomponent', 'create_views', True)
 
         will run the files:
 
             # sqlite DB
-            /plugins/myplugin/sql/create_views.sqlite.sql
+            /components/mycomponent/sql/create_views.sqlite.sql
             # postgres DB
-            /plugins/myplugin/sql/create_views.pgsql.sql
+            /components/mycomponent/sql/create_views.pgsql.sql
             ...
 
         The dialect prefix used is the same as the sqlalchemy prefix.
@@ -28,7 +28,7 @@ def run_plugin_sql(plugin, target, use_dialect=False):
         relative_sql_path = 'sql/%s.%s.sql' % (target, db.engine.dialect.name)
     else:
         relative_sql_path = 'sql/%s.sql' % (target)
-    _run_sql('%s:%s'%(plugin,relative_sql_path))
+    _run_sql('%s:%s'%(component,relative_sql_path))
 
 def run_app_sql(target, use_dialect=False):
     ''' used to run SQL from files in an apps "sql" directory:

@@ -1,4 +1,4 @@
-from plugstack.sqlalchemy import db
+from compstack.sqlalchemy import db
 from sqlitefktg4sa import auto_assign
 
 def action_10_create_db_objects():

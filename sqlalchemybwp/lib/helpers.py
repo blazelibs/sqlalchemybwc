@@ -2,7 +2,7 @@ from blazeutils import tolist
 from savalidation import ValidationError
 from sqlalchemy.exc import IntegrityError
 
-from plugstack.sqlalchemy import db
+from compstack.sqlalchemy import db
 
 def is_unique_exc(exc):
     if isinstance(exc, ValidationError):

@@ -3,7 +3,7 @@ import formencode
 from savalidation._internal import ValidationHandler, ClassMutator
 from sqlalchemy import sql as sasql
 
-from plugstack.sqlalchemy import db
+from compstack.sqlalchemy import db
 
 class _UniqueValidator(formencode.validators.FancyValidator):
     """

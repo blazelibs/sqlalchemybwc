@@ -11,7 +11,7 @@ class Default(DefaultSettings):
         self.app_package = app_package
         DefaultSettings.init(self)
 
-        self.add_plugin(app_package, 'sqlalchemy', 'sqlalchemybwp')
+        self.add_component(app_package, 'sqlalchemy', 'sqlalchemybwp')
 
         self.add_route('/', 'Index')
 
@@ -40,7 +40,7 @@ class SplitSessionsTest(Default):
 
         self.db.url = 'sqlite://'
 
-        self.plugins.sqlalchemy.use_split_sessions = True
+        self.components.sqlalchemy.use_split_sessions = True
 
 try:
     from site_settings import *

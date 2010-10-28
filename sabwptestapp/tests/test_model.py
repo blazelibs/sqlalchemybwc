@@ -1,5 +1,5 @@
 
-from plugstack.sqlalchemy import db
+from compstack.sqlalchemy import db
 from sabwptestapp.model.entities import Blog
 from sabwptestapp.model.schema import colors
 
