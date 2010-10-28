@@ -3,10 +3,10 @@ from blazeweb.tasks import run_tasks
 from blazeweb.testing import TestApp
 from nose.tools import eq_
 from sqlalchemy.orm.exc import DetachedInstanceError
-from sqlalchemybwp import db
+from sqlalchemybwc import db
 
-from sabwptestapp.application import make_wsgi
-from sabwptestapp.model.orm import Car
+from sqlalchemybwc_ta.application import make_wsgi
+from sqlalchemybwc_ta.model.orm import Car
 
 class TestTemplates(object):
 

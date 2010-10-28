@@ -1,5 +1,5 @@
 ^MANIFEST$
-^(build|dist|SQLAlchemyBWP\.egg-info)/
+^(build|dist|SQLAlchemyBWC\.egg-info)/
 \.py[co]$
 \.DS_Store$
 ^env$

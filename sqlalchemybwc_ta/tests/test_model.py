@@ -1,7 +1,7 @@
 
 from compstack.sqlalchemy import db
-from sabwptestapp.model.entities import Blog
-from sabwptestapp.model.schema import colors
+from sqlalchemybwc_ta.model.entities import Blog
+from sqlalchemybwc_ta.model.schema import colors
 
 class TestBlog(object):
 

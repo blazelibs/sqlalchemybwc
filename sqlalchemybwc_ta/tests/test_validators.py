@@ -1,8 +1,8 @@
 from nose.tools import eq_
 from savalidation import ValidationError
-from sqlalchemybwp import db
+from sqlalchemybwc import db
 
-from sabwptestapp.model.orm import HasUniqueValidation
+from sqlalchemybwc_ta.model.orm import HasUniqueValidation
 
 class TestUniqueValidation(object):
 

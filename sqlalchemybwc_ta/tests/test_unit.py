@@ -1,10 +1,10 @@
 from nose.tools import eq_
-from sqlalchemybwp import db
-from sqlalchemybwp.lib.decorators import one_to_none_ncm
-from sqlalchemybwp.lib.helpers import is_unique_exc, _is_unique_msg, \
+from sqlalchemybwc import db
+from sqlalchemybwc.lib.decorators import one_to_none_ncm
+from sqlalchemybwc.lib.helpers import is_unique_exc, _is_unique_msg, \
     _is_unique_error_saval, _is_null_msg, _is_fk_msg
 
-from sabwptestapp.model.orm import UniqueRecord, OneToNone, Car, \
+from sqlalchemybwc_ta.model.orm import UniqueRecord, OneToNone, Car, \
     UniqueRecordTwo, Truck, CustomerType, NoDefaults, declarative_base
 
 def test_ignore_unique():

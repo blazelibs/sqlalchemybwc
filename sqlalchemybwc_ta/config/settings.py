@@ -11,7 +11,7 @@ class Default(DefaultSettings):
         self.app_package = app_package
         DefaultSettings.init(self)
 
-        self.add_component(app_package, 'sqlalchemy', 'sqlalchemybwp')
+        self.add_component(app_package, 'sqlalchemy', 'sqlalchemybwc')
 
         self.add_route('/', 'Index')
 
