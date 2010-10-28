@@ -14,11 +14,11 @@ class SQLAlchemyContainer(object):
         self.engine = engine_from_config(dict(settings.db), prefix='')
         self.meta = MetaData()
         self.Session = scoped_session(sessionmaker(bind=self.engine, extension=ValidatingSessionExtension()))
-        if settings.plugins.sqlalchemy.use_split_sessions:
+        if settings.components.sqlalchemy.use_split_sessions:
             self.AppLevelSession = scoped_session(sessionmaker(bind=self.engine, extension=ValidatingSessionExtension()))
 
     def get_scoped_session_class(self):
-        if settings.plugins.sqlalchemy.use_split_sessions and not registry_has_object(rg):
+        if settings.components.sqlalchemy.use_split_sessions and not registry_has_object(rg):
             return self.AppLevelSession
         return self.Session
 

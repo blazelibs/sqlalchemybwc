@@ -5,7 +5,7 @@ version = '0.1dev'
 setup(
     name='SQLAlchemyBWP',
     version=version,
-    description="An SQLAlchemy plugin for the BlazeWeb framework",
+    description="An SQLAlchemy component for the BlazeWeb framework",
     classifiers=[
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',

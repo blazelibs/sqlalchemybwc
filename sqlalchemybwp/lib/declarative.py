@@ -10,9 +10,9 @@ import sqlalchemy.orm as saorm
 import sqlalchemy.sql as sasql
 from sqlalchemy.util import classproperty
 
-from plugstack.sqlalchemy import db
-from plugstack.sqlalchemy.lib.columns import SmallIntBool
-from plugstack.sqlalchemy.lib.decorators import one_to_none, transaction, \
+from compstack.sqlalchemy import db
+from compstack.sqlalchemy.lib.columns import SmallIntBool
+from compstack.sqlalchemy.lib.decorators import one_to_none, transaction, \
     ignore_unique
 
 class DefaultColsMixin(object):

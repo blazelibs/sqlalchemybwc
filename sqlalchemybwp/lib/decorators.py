@@ -9,8 +9,8 @@
 from decorator import decorator
 from sqlalchemy.orm.exc import NoResultFound
 
-from plugstack.sqlalchemy import db
-from plugstack.sqlalchemy.lib.helpers import is_unique_exc
+from compstack.sqlalchemy import db
+from compstack.sqlalchemy.lib.helpers import is_unique_exc
 
 @decorator
 def transaction_ncm(f, *args, **kwargs):

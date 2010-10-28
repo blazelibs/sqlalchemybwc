@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 
-from plugstack.sqlalchemy.lib.declarative import declarative_base, DefaultMixin
+from compstack.sqlalchemy.lib.declarative import declarative_base, DefaultMixin
 
 Base = declarative_base()
 
