@@ -1,6 +1,6 @@
 from blazeweb.views import View
 
-from sabwptestapp.model.orm import Car
+from sqlalchemybwc_ta.model.orm import Car
 
 class Index(View):
     def default(self):
