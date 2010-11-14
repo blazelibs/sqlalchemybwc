@@ -2,8 +2,7 @@ from blazeweb.config import ComponentSettings
 
 class Settings(ComponentSettings):
     def init(self):
-        self.for_me.pre_test_init_event_enabled = True
-        self.for_me.pre_test_clear_data_only = False
+        self.for_me.pre_test_init_tasks = 'clear-db', 'init-db:~test'
         # set to true when you want different sessions for application level and
         # request level code.  Currently used for testing so that entity
         # objects returned from a session don't lose their session the next
