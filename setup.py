@@ -29,6 +29,7 @@ setup(
     name='SQLAlchemyBWC',
     version=version,
     description="An SQLAlchemy component for the BlazeWeb applications",
+    long_description=__doc__,
     classifiers=[
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -36,7 +37,7 @@ setup(
     ],
     author='Randy Syring',
     author_email='rsyring@gmail.com',
-    url='',
+    url='http://bitbucket.org/rsyring/sqlalchemybwc/',
     license='BSD',
     packages=find_packages(exclude=['ez_setup']),
     zip_safe=False,
