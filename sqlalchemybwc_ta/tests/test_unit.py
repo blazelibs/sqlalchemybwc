@@ -181,25 +181,43 @@ def test_is_null_msg():
 
 def test_is_fk_msg():
     totest = {
+        # these examples are from errors created by SQLiteFKTG4SA triggers
         'sqlite': [
-            '(IntegrityError) insert on table "permissions" violates foreign key constraint "permissions__protected_entity_id__fki__applications__id__auto"'
-            """(IntegrityError) delete on table "applications" violates foreign key constraint "permissions__protected_entity_id__fkd__applications__id__auto" u'DELETE FROM applications WHERE applications.id = ?' (1,)"""
+            # prevent insert
+            (True, 'insert on table "comments" violates foreign key constraint "comments__blog_ident__fki__blogs__ident__auto"'),
+            # prevent update
+            (True, 'update on table "comments" violates foreign key constraint "comments__blog_ident__fku__blogs__ident__auto"'),
+            # prevent parent delete
+            (True, 'delete on table "blogs" violates foreign key constraint "comments__blog_ident__fkd__blogs__ident__auto"'),
+            # some other field
+            (False, 'insert on table "comments" violates foreign key constraint "comments__user_id__fki__users__id__auto"'),
         ],
         'postgresql':[
-            '(IntegrityError) insert or update on table "permissions" violates foreign key constraint "permissions_protected_entity_id_fkey" DETAIL:  Key (protected_entity_id)=(1000) is not present in table "applications".'
-            '(IntegrityError) update or delete on table "applications" violates foreign key constraint "permissions_protected_entity_id_fkey" on table "permissions"  DETAIL:  Key (id)=(4) is still referenced from table "permissions".'
+            # preventing insert
+            (True, """insert or update on table "comments" violates foreign key constraint "comments_blog_ident_fkey" DETAIL:  Key (blog_ident)=(10000) is not present in table "blogs"."""),
+            # preventing update
+            (True, """insert or update on table "comments" violates foreign key constraint "comments_blog_ident_fkey" DETAIL:  Key (blog_ident)=(10000) is not present in table "blogs"."""),
+            # preventing parent update
+            (True, """update or delete on table "blogs" violates foreign key constraint "comments_blog_ident_fkey" on table "comments" DETAIL:  Key (ident)=(EfCY15xOQocd) is still referenced from table "comments".)"""),
+            # preventing parent delete
+            (True, """update or delete on table "blogs" violates foreign key constraint "comments_blog_ident_fkey" on table "comments DETAIL:  Key (ident)=(hWYr3uG4ZAXU) is still referenced from table "comments"."""),
+            # some other field than the one we are expecting
+            (False, """insert or update on table "comments" violates foreign key constraint "comments_user_id_fkey" DETAIL:  Key (user_id)=(10000) is not present in table "users"."""),
         ],
-        'mssql': [
-            """The INSERT statement conflicted with the FOREIGN KEY constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.permissions", column 'protected_entity_id'.""",
-            """The DELETE statement conflicted with the REFERENCE constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.permissions", column 'protected_entity_id'."""
-            """The UPDATE statement conflicted with the FOREIGN KEY constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.permissions", column 'protected_entity_id'."""
-        ]
+        #'mssql': [
+        #    (True, """The INSERT statement conflicted with the FOREIGN KEY constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.auth_applications", column 'id'"""),
+        #    (True, """The UPDATE statement conflicted with the FOREIGN KEY constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.auth_applications", column 'id'."""),
+        #    (True, """The DELETE statement conflicted with the REFERENCE constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.auth_permissions", column 'application_id'."""),
+        #]
     }
-    def dotest(dialect, msg):
-        assert _is_fk_msg(dialect, msg, 'protected_entity_id')
+    def test_is_fk(dialect, msg, is_fk_flag):
+        retval = _is_fk_msg(dialect, msg, 'blog_ident', 'ident' )
+        eq_(is_fk_flag, retval)
+
     for k,v in totest.iteritems():
-        for msg in v:
-            yield dotest, k, msg
+        for is_fk_flag, msg in v:
+            yield test_is_fk, k, msg, is_fk_flag
+
 
 def test_is_unique_error_saval():
     totest = [

@@ -8,3 +8,4 @@
 glob:sabwptestapp/config/site_settings.py
 glob:cover
 glob:.coverage
+glob:sqlalchemybwc_ta/config/site_settings.py
