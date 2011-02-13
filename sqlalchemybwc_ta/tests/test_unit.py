@@ -206,15 +206,15 @@ def test_is_fk_msg():
         ],
         'mssql': [
             # preventing insert
-            (True, """The INSERT statement conflicted with the FOREIGN KEY constraint "FK__comments__blog_i__4E88ABD4". The conflict occurred in database "temp", table "dbo.blogs", column 'ident'."""),
+            (True, r"""The INSERT statement conflicted with the FOREIGN KEY constraint "FK__comments__blog_i__4E88ABD4". The conflict occurred in database "temp", table "dbo.blogs", column \'ident\'."""),
             # preventing update
-            (True, """The UPDATE statement conflicted with the FOREIGN KEY constraint "FK__comments__blog_i__4E88ABD4". The conflict occurred in database "temp", table "dbo.blogs", column 'ident'."""),
+            (True, r"""The UPDATE statement conflicted with the FOREIGN KEY constraint "FK__comments__blog_i__4E88ABD4". The conflict occurred in database "temp", table "dbo.blogs", column \'ident\'."""),
             # preventing parent update
-            (True, """The UPDATE statement conflicted with the REFERENCE constraint "FK__comments__blog_i__4E88ABD4". The conflict occurred in database "temp", table "dbo.comments", column 'blog_ident'."""),
+            (True, r"""The UPDATE statement conflicted with the REFERENCE constraint "FK__comments__blog_i__4E88ABD4". The conflict occurred in database "temp", table "dbo.comments", column \'blog_ident\'."""),
             # preventing parent delete
-            (True, """The DELETE statement conflicted with the REFERENCE constraint "FK__comments__blog_i__4E88ABD4". The conflict occurred in database "temp", table "dbo.comments", column 'blog_ident'."""),
+            (True, r"""The DELETE statement conflicted with the REFERENCE constraint "FK__comments__blog_i__4E88ABD4". The conflict occurred in database "temp", table "dbo.comments", column \'blog_ident\'."""),
             # some other field than the one we are expecting
-            (False, """The INSERT statement conflicted with the FOREIGN KEY constraint "FK__comments__user_i__4E88ABDC4". The conflict occurred in database "temp", table "dbo.users", column 'id'."""),
+            (False, r"""The INSERT statement conflicted with the FOREIGN KEY constraint "FK__comments__user_i__4E88ABDC4". The conflict occurred in database "temp", table "dbo.users", column \'id\'."""),
         ]
     }
     def test_is_fk(dialect, msg, is_fk_flag):
