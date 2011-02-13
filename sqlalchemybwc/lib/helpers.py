@@ -37,12 +37,36 @@ def _is_unique_error_saval(validation_errors):
                 return False
     return True
 
-def is_fk_exc(exc, field_name):
+def is_fk_exc(exc, key_cname, ref_cname):
+    """
+        Use in testing to identify a FK constraint failure.
+
+        Give then following column definition::
+
+            [application_id] [int] NOT NULL REFERENCES [dbo].[auth_applications] ([id])
+
+        Example usage of this function would be::
+
+            try:
+                # do something bad that violates the FK and commit
+                ...
+                dbsess.commit()
+            except Exception, e:
+                if not is_fk_exc(e, 'application_id', 'id'):
+                    raise
+
+        The params for this function are:
+
+            key_cname = the name of the column that has the FK
+            ref_cname = the name of the column (on a different table) that
+                the FK references
+    """
     if not isinstance(exc, IntegrityError):
         return False
-    return _is_fk_msg(db.engine.dialect.name, str(exc), field_name)
+    msg = str(exc).replace('(IntegrityError) ', '', 1)
+    return _is_fk_msg(db.engine.dialect.name, msg, key_cname, ref_cname)
 
-def _is_fk_msg(dialect, msg, field_name):
+def _is_fk_msg(dialect, msg, key_cname, ref_cname):
     """
         easier unit testing this way
     """
@@ -50,20 +74,28 @@ def _is_fk_msg(dialect, msg, field_name):
         # this test assumes sqlite foreign keys created by SQLiteFKTG4SA.  The
         # reason the field name is in the msg is because SQLiteFKTG4SA uses
         # the field name as part of the constraint name
-        if 'violates foreign key constraint' in msg and field_name in msg:
+        if 'violates foreign key constraint' in msg and '__%s__fk' % key_cname in msg:
             return True
     elif dialect == 'postgresql':
         # postgresql does not have the field name in the message when the
         # record referenced by a FK is deleted, so don't check for field_name
         # here
+        print 'here', msg
         if 'violates foreign key constraint' in msg:
-            return True
+            if msg.startswith('insert or update') and ('Key (%s)=' % key_cname) in msg:
+                return True
+            if msg.startswith('update or delete') and ('Key (%s)=' % ref_cname) in msg:
+                return True
     elif dialect == 'mssql':
         # this test assumes MSSQL 2005
         is_fk_message = 'conflicted with the FOREIGN KEY constraint' in msg
         is_ref_message = 'conflicted with the REFERENCE constraint' in msg
-        field_name_present = ("column '%s'" % field_name) in msg
-        if (is_fk_message or is_ref_message) and field_name_present:
+        field_name_present = ("column '%s'" % key_cname) in msg
+        # FK messages have the referenced column's info in them
+        if is_fk_message and ("column '%s'" % ref_cname) in msg:
+                return True
+        # FK messages have the key column's info in them
+        if is_ref_message and ("column '%s'" % key_cname) in msg:
             return True
     else:
         raise ValueError('is_fk_exc() does not yet support dialect: %s' % dialect)
