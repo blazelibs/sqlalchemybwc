@@ -2,7 +2,7 @@ from nose.tools import eq_
 from sqlalchemybwc import db
 from sqlalchemybwc.lib.decorators import one_to_none_ncm
 from sqlalchemybwc.lib.helpers import is_unique_exc, _is_unique_msg, \
-    _is_unique_error_saval, _is_null_msg, _is_fk_msg
+    _is_unique_error_saval, _is_null_msg, _is_fk_msg, _is_check_const
 
 from sqlalchemybwc_ta.model.orm import UniqueRecord, OneToNone, Car, \
     UniqueRecordTwo, Truck, CustomerType, NoDefaults, declarative_base
@@ -225,6 +225,28 @@ def test_is_fk_msg():
         for is_fk_flag, msg in v:
             yield test_is_fk, k, msg, is_fk_flag
 
+def test_is_check_constraint_msg():
+    totest = {
+        'sqlite': [
+            (True, 'constraint failed'),
+        ],
+        'postgresql':[
+            (True, 'new row for relation "auth_users" violates check constraint "ck_auth_users_uids_not_null"'),
+            # some other constraint than the one we are expecting
+            (False, 'new row for relation "auth_users" violates check constraint "ck_something_else"'),
+        ],
+        'mssql': [
+            (True, 'The INSERT statement conflicted with the CHECK constraint "ck_auth_users_uids_not_null". The conflict occurred in database "testdb", table "dbo.auth_users"'),
+            (False, 'The INSERT statement conflicted with the CHECK constraint "ck_something_else". The conflict occurred in database "testdb", table "dbo.auth_users"'),
+        ]
+    }
+    def check_func(dialect, msg, expect):
+        retval = _is_check_const(dialect, msg, 'ck_auth_users_uids_not_null' )
+        eq_(expect, retval)
+
+    for k,v in totest.iteritems():
+        for expect, msg in v:
+            yield check_func, k, msg, expect
 
 def test_is_unique_error_saval():
     totest = [

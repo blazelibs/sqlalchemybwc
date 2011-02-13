@@ -121,6 +121,25 @@ def _is_null_msg(dialect, msg, field_name):
         raise ValueError('is_null_exc() does not yet support dialect: %s' % dialect)
     return False
 
+def is_check_const_exc(exc, constraint_name):
+    if not isinstance(exc, IntegrityError):
+        return False
+    return _is_check_const(db.engine.dialect.name, str(exc), constraint_name)
+
+def _is_check_const(dialect, msg, constraint_name):
+    if dialect == 'mssql':
+        if 'conflicted with the CHECK constraint' in msg and constraint_name in msg:
+            return True
+    elif dialect == 'sqlite':
+        if 'constraint failed' in msg:
+            return True
+    elif dialect == 'postgresql':
+        if 'violates check constraint' in msg and constraint_name in msg:
+            return True
+    else:
+        raise ValueError('is_constraint_exc() does not yet support dialect: %s' % dialect)
+    return False
+
 def clear_db():
     if db.engine.dialect.name == 'postgresql':
         sql = []
