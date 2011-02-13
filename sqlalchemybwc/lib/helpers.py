@@ -80,7 +80,6 @@ def _is_fk_msg(dialect, msg, key_cname, ref_cname):
         # postgresql does not have the field name in the message when the
         # record referenced by a FK is deleted, so don't check for field_name
         # here
-        print 'here', msg
         if 'violates foreign key constraint' in msg:
             if msg.startswith('insert or update') and ('Key (%s)=' % key_cname) in msg:
                 return True
