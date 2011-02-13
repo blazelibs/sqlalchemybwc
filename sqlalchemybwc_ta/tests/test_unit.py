@@ -181,7 +181,7 @@ def test_is_null_msg():
 
 def test_is_fk_msg():
     totest = {
-        # these examples are from errors created by SQLiteFKTG4SA triggers
+        # sqlite examples are from errors created by SQLiteFKTG4SA triggers
         'sqlite': [
             # prevent insert
             (True, 'insert on table "comments" violates foreign key constraint "comments__blog_ident__fki__blogs__ident__auto"'),
@@ -204,11 +204,18 @@ def test_is_fk_msg():
             # some other field than the one we are expecting
             (False, """insert or update on table "comments" violates foreign key constraint "comments_user_id_fkey" DETAIL:  Key (user_id)=(10000) is not present in table "users"."""),
         ],
-        #'mssql': [
-        #    (True, """The INSERT statement conflicted with the FOREIGN KEY constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.auth_applications", column 'id'"""),
-        #    (True, """The UPDATE statement conflicted with the FOREIGN KEY constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.auth_applications", column 'id'."""),
-        #    (True, """The DELETE statement conflicted with the REFERENCE constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.auth_permissions", column 'application_id'."""),
-        #]
+        'mssql': [
+            # preventing insert
+            (True, """The INSERT statement conflicted with the FOREIGN KEY constraint "FK__comments__blog_i__4E88ABD4". The conflict occurred in database "temp", table "dbo.blogs", column 'ident'."""),
+            # preventing update
+            (True, """The UPDATE statement conflicted with the FOREIGN KEY constraint "FK__comments__blog_i__4E88ABD4". The conflict occurred in database "temp", table "dbo.blogs", column 'ident'."""),
+            # preventing parent update
+            (True, """The UPDATE statement conflicted with the REFERENCE constraint "FK__comments__blog_i__4E88ABD4". The conflict occurred in database "temp", table "dbo.comments", column 'blog_ident'."""),
+            # preventing parent delete
+            (True, """The DELETE statement conflicted with the REFERENCE constraint "FK__comments__blog_i__4E88ABD4". The conflict occurred in database "temp", table "dbo.comments", column 'blog_ident'."""),
+            # some other field than the one we are expecting
+            (False, """The INSERT statement conflicted with the FOREIGN KEY constraint "FK__comments__user_i__4E88ABDC4". The conflict occurred in database "temp", table "dbo.users", column 'id'."""),
+        ]
     }
     def test_is_fk(dialect, msg, is_fk_flag):
         retval = _is_fk_msg(dialect, msg, 'blog_ident', 'ident' )
