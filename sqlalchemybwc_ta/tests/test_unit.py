@@ -192,7 +192,7 @@ def test_is_fk_msg():
         'mssql': [
             """The INSERT statement conflicted with the FOREIGN KEY constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.permissions", column 'protected_entity_id'.""",
             """The DELETE statement conflicted with the REFERENCE constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.permissions", column 'protected_entity_id'."""
-
+            """The UPDATE statement conflicted with the FOREIGN KEY constraint "permissions_protected_entity_id_fkey". The conflict occurred in database "TestDB", table "dbo.permissions", column 'protected_entity_id'."""
         ]
     }
     def dotest(dialect, msg):
