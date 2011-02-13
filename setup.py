@@ -2,7 +2,7 @@
 Introduction
 ---------------
 
-CommonBWC is a component for `BlazeWeb <http://pypi.python.org/pypi/BlazeWeb/>`_
+SQLAlchemyBWC is a component for `BlazeWeb <http://pypi.python.org/pypi/BlazeWeb/>`_
 applications.
 
 Questions & Comments
@@ -15,7 +15,7 @@ Current Status
 
 The code stays pretty stable, but the API may change in the future.
 
-The `CommonBWC tip <http://bitbucket.org/rsyring/sqlalachemybwc/get/tip.zip#egg=sqlalchemybwc-dev>`_
+The `SQLAlchemyBWC tip <http://bitbucket.org/rsyring/sqlalchemybwc/get/tip.zip#egg=sqlalchemybwc-dev>`_
 is installable via `easy_install` with ``easy_install sqlalchemybwc==dev``
 """
 
