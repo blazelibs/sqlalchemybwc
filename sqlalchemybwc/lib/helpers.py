@@ -60,7 +60,10 @@ def _is_fk_msg(dialect, msg, field_name):
             return True
     elif dialect == 'mssql':
         # this test assumes MSSQL 2005
-        if ('conflicted with the FOREIGN KEY constraint' in msg or 'conflicted with the REFERENCE constraint' in msg) and "column 'protected_entity_id'" in msg:
+        is_fk_message = 'conflicted with the FOREIGN KEY constraint' in msg
+        is_ref_message = 'conflicted with the REFERENCE constraint' in msg
+        field_name_present = ("column '%s'" % field_name) in msg
+        if (is_fk_message or is_ref_message) and field_name_present:
             return True
     else:
         raise ValueError('is_fk_exc() does not yet support dialect: %s' % dialect)
