@@ -90,12 +90,11 @@ def _is_fk_msg(dialect, msg, key_cname, ref_cname):
         # this test assumes MSSQL 2005
         is_fk_message = 'conflicted with the FOREIGN KEY constraint' in msg
         is_ref_message = 'conflicted with the REFERENCE constraint' in msg
-        field_name_present = ("column '%s'" % key_cname) in msg
         # FK messages have the referenced column's info in them
-        if is_fk_message and ("column '%s'" % ref_cname) in msg:
+        if is_fk_message and (r"column \'%s\'" % ref_cname) in msg:
                 return True
         # FK messages have the key column's info in them
-        if is_ref_message and ("column '%s'" % key_cname) in msg:
+        if is_ref_message and (r"column \'%s\'" % key_cname) in msg:
             return True
     else:
         raise ValueError('is_fk_exc() does not yet support dialect: %s' % dialect)
