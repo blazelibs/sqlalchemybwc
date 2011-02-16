@@ -101,7 +101,9 @@ def _is_fk_msg(dialect, msg, key_cname, ref_cname):
 
 def is_null_exc(exc, field_name):
     if isinstance(exc, ValidationError):
-        return len(exc.invalid_instances) == 1 and _is_null_error_saval(exc.invalid_instances[0].validation_errors)
+        if len(exc.invalid_instances) != 1:
+            return False
+        return _is_null_error_saval(exc.invalid_instances[0].validation_errors, field_name)
     if not isinstance(exc, IntegrityError):
         return False
     return _is_null_msg(db.engine.dialect.name, str(exc), field_name)
@@ -123,12 +125,13 @@ def _is_null_msg(dialect, msg, field_name):
         raise ValueError('is_null_exc() does not yet support dialect: %s' % dialect)
     return False
 
-def _is_null_error_saval(validation_errors):
+def _is_null_error_saval(validation_errors, field_name):
     if not len(validation_errors):
         return False
     for field, error_msgs in validation_errors.items():
+        if field != field_name:
+            return False
         for err in tolist(error_msgs):
-            print err
             if 'Please enter a value' != err:
                 return False
     return True
