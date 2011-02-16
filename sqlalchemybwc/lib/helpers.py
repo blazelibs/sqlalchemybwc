@@ -4,6 +4,12 @@ from sqlalchemy.exc import IntegrityError
 
 from compstack.sqlalchemy import db
 
+def sa_dialect_is(*testfor):
+    for d in testfor:
+        if db.engine.dialect.name == d:
+            return True
+    return False
+
 def is_unique_exc(exc):
     if isinstance(exc, ValidationError):
         return len(exc.invalid_instances) == 1 and _is_unique_error_saval(exc.invalid_instances[0].validation_errors)
