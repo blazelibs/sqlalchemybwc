@@ -100,6 +100,8 @@ def _is_fk_msg(dialect, msg, key_cname, ref_cname):
     return False
 
 def is_null_exc(exc, field_name):
+    if isinstance(exc, ValidationError):
+        return len(exc.invalid_instances) == 1 and _is_null_error_saval(exc.invalid_instances[0].validation_errors)
     if not isinstance(exc, IntegrityError):
         return False
     return _is_null_msg(db.engine.dialect.name, str(exc), field_name)
@@ -120,6 +122,16 @@ def _is_null_msg(dialect, msg, field_name):
     else:
         raise ValueError('is_null_exc() does not yet support dialect: %s' % dialect)
     return False
+
+def _is_null_error_saval(validation_errors):
+    if not len(validation_errors):
+        return False
+    for field, error_msgs in validation_errors.items():
+        for err in tolist(error_msgs):
+            print err
+            if 'Please enter a value' != err:
+                return False
+    return True
 
 def is_check_const_exc(exc, constraint_name):
     if not isinstance(exc, IntegrityError):
