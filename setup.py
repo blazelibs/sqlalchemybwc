@@ -43,7 +43,6 @@ setup(
     zip_safe=False,
     install_requires=[
         'BlazeWeb>=0.3.0',
-        'SQLAlchemy>=0.6.1',
         'savalidation>=0.1',
         'SQLiteFKTG4SA>=0.1.1'
     ],
