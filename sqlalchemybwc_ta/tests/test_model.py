@@ -2,7 +2,7 @@
 from nose.plugins.skip import SkipTest
 
 from compstack.sqlalchemy import db
-from compstack.sqlalchemy.lib.helpers import is_fk_exc
+from compstack.sqlalchemy.lib.helpers import is_fk_exc, is_null_exc
 from sqlalchemybwc_ta.model.entities import Blog, Comment
 from sqlalchemybwc_ta.model.schema import colors
 
@@ -26,7 +26,7 @@ class TestColors(object):
         result = db.engine.execute(colors.select())
         assert result
 
-class TestFKs(object):
+class TestIntegrity(object):
 
     def setUp(self):
         Comment.delete_all()
@@ -81,4 +81,13 @@ class TestFKs(object):
         except Exception, e:
             db.sess.rollback()
             if not is_fk_exc(e, 'blog_ident', 'ident'):
+                raise
+
+    def test_not_nullable(self):
+        try:
+            Blog.add(title=None)
+            assert False, 'expected not null exception'
+        except Exception, e:
+            db.sess.rollback()
+            if not is_null_exc(e, 'title'):
                 raise
