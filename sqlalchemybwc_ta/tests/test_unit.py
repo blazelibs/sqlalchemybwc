@@ -3,6 +3,7 @@ from sqlalchemybwc import db
 from sqlalchemybwc.lib.decorators import one_to_none_ncm
 from sqlalchemybwc.lib.helpers import is_unique_exc, _is_unique_msg, \
     _is_unique_error_saval, _is_null_msg, _is_fk_msg, _is_check_const
+from sqlalchemybwc.lib.sql import run_app_sql, run_component_sql
 
 from sqlalchemybwc_ta.model.orm import UniqueRecord, OneToNone, Car, \
     UniqueRecordTwo, Truck, CustomerType, NoDefaults, declarative_base
@@ -518,3 +519,42 @@ def test_declarative_base():
     Base1 = declarative_base()
     Base2 = declarative_base()
     assert Base1 is Base2
+
+class TestSQLRunFuncs(object):
+
+    def setUp(self):
+        Truck.delete_all()
+
+    def test_app_file(self):
+        run_app_sql('run_sql_test1')
+        eq_(Truck.count(), 3)
+
+    def test_comp_file(self):
+        run_component_sql('foo', 'run_sql_test1')
+        eq_(Truck.count(), 3)
+
+    def test_app_file_with_dialect(self):
+        run_app_sql('run_sql_test1', use_dialect=True)
+        eq_(Truck.count(), 2)
+
+    def test_app_directory(self):
+        run_app_sql('run_dir_test')
+        eq_(Truck.count(), 2)
+        trucks = Truck.list()
+        # make sure the updates ran, this ensures the files are getting executed
+        # in the correct order
+        eq_(trucks[0].make, 'ford')
+        eq_(trucks[0].model, 'f250')
+        eq_(trucks[1].model, '2500')
+
+    def test_app_directory_dialects(self):
+        run_app_sql('run_dir_dialect_test')
+        eq_(Truck.count(), 1)
+        t = Truck.first()
+        eq_(t.make, 'dialect')
+        eq_(t.model, db.engine.dialect.name)
+
+    def test_comp_dir(self):
+        run_component_sql('foo', 'run_dir_test')
+        eq_(Truck.count(), 2)
+        trucks = Truck.list()
