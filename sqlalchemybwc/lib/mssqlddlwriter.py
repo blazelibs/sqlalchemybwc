@@ -79,6 +79,8 @@ class SysObject(Base, MethodsMixin):
             return DbTrigger(*args)
         if type == 'UQ':
             return DbUniqueConstraint(*args)
+        if type == 'C':
+            return DbCheckConstraint(*args)
         raise ValueError('type "%s" not supported' % type)
 
 class SysColumn(Base, MethodsMixin):
@@ -154,7 +156,18 @@ class SysForeignKey(Base, MethodsMixin):
             return None
         return desc.replace('_', ' ')
 
-class DbObject(object):
+class SysCheckConstraint(Base, MethodsMixin):
+    __tablename__ = 'check_constraints'
+    __table_args__ = {'schema':'sys'}
+
+    object_id = sa.Column(sa.Integer, nullable=False, primary_key=True)
+    parent_object_id = sa.Column(sa.Integer, sa.ForeignKey('sys.objects.object_id'), nullable=False)
+    name = sa.Column(sa.Unicode(128), nullable=False)
+    definition = sa.Column(sa.Text, nullable=False)
+
+    parent = saorm.relation(SysObject, lazy=False)
+
+class ObjWriter(object):
     def __init__(self, dump_path, oid, name, type, createts, modts, so):
         self.dump_path = dump_path
         self.oid = oid
@@ -190,7 +203,6 @@ class DbObject(object):
         output = []
         output.append('-- created: %s' % self.createts)
         output.append('-- last updated: %s' % self.modts)
-        output.append('')
         if self.ansi_nulls:
             output.append('--statement-break')
             output.append('SET ANSI_NULLS ON')
@@ -199,18 +211,19 @@ class DbObject(object):
             output.append('SET QUOTED_IDENTIFIER ON')
         output.append('')
         output.append('--statement-break')
-        output.append(self.ddl())
+        output.append(self.ddl().strip())
         return '\n'.join(output)
 
     def write(self):
         with open(self.file_path, 'wb') as fp:
             fp.write( self.file_output() )
 
-class DbTable(DbObject):
+class DbTable(ObjWriter):
     folder_name = 'tables'
 
     def ddl(self):
-        t = sa.Table(self.name, _ddl_meta, autoload=True, autoload_with=db.engine)
+        output_ddl = []
+        t = sa.Table(self.name, _ddl_meta, autoload=True, autoload_with=db.engine, schema=self.so.schema.name)
 
         # SA doesn't currently pick up foreign key ON DELETE/UPDATE, so we have
         # to patch those values in
@@ -219,13 +232,18 @@ class DbTable(DbObject):
                 sysfk = SysForeignKey.get_by(parent_object_id = self.oid, name=c.name)
                 c.ondelete = sysfk.ondelete()
                 c.onupdate = sysfk.onupdate()
-
-        table_ddl = str(sasch.CreateTable(t).compile(db.engine))
-        uc_ddl = self.uc_ddl()
-        return '\n'.join((table_ddl, uc_ddl))
+        table_ddl = str(sasch.CreateTable(t).compile(db.engine)).strip()
+        output_ddl.append(table_ddl)
+        uc_ddl = self.uc_ddl().strip()
+        if uc_ddl:
+            output_ddl.append(uc_ddl)
+        cc_ddl = self.cc_ddl().strip()
+        if cc_ddl:
+            output_ddl.append(cc_ddl)
+        return '\n\n'.join(output_ddl)
 
     def write(self):
-        DbObject.write(self)
+        ObjWriter.write(self)
         self.trigger_ddl()
 
     def uc_ddl(self):
@@ -244,6 +262,22 @@ class DbTable(DbObject):
 
         return '\n'.join(uc_ddl)
 
+    def cc_ddl(self):
+        cc_ddl = []
+        res = SysObject.list_where(
+            sasql.and_(
+                SysObject.parent_object_id == self.oid,
+                SysObject.type == u'C'
+            ),
+            order_by=SysObject.name
+        )
+
+        for obj in res:
+            cc_ddl.append('--statement-break')
+            cc_ddl.append(obj.getwriter(self.dump_path).ddl())
+
+        return '\n'.join(cc_ddl)
+
     def trigger_ddl(self):
         trigger_sql = []
         res = SysObject.list_where(
@@ -257,36 +291,54 @@ class DbTable(DbObject):
             twr = obj.getwriter(self.dump_path)
             twr.write()
 
-class DbView(DbObject):
+class DbView(ObjWriter):
     folder_name = 'views'
 
-class DbStoredProcedure(DbObject):
+class DbStoredProcedure(ObjWriter):
     folder_name = 'sps'
 
-class DbFunction(DbObject):
+class DbFunction(ObjWriter):
     folder_name = 'functions'
 
-class DbTrigger(DbObject):
+class DbTrigger(ObjWriter):
     folder_name = 'tables'
 
     def write(self):
         self.file_path = path.join(self.type_path, '%s_trg_%s.sql' % (self.so.parent.name, self.name))
-        DbObject.write(self)
+        ObjWriter.write(self)
 
-class DbUniqueConstraint(DbObject):
+class DbConstraintBase(ObjWriter):
+
+    def alter_table_ddl(self):
+        ddl = []
+        ddl.append('ALTER TABLE')
+        ddl.append('[%s].[%s]' % (self.so.parent.schema.name, self.so.parent.name))
+        ddl.append('ADD CONSTRAINT [%s]' % self.name)
+        return ' '.join(ddl)
+
+class DbUniqueConstraint(DbConstraintBase):
     folder_name = ''
 
     def ddl(self):
         idx = SysIndex.get_by(parent_id=self.so.parent.id, name=self.name)
         ddl = []
-        ddl.append('ALTER TABLE')
-        ddl.append('[%s].[%s]' % (self.so.parent.schema.name, self.so.parent.name))
-        ddl.append('ADD CONSTRAINT [%s] UNIQUE %s' % (self.name, idx.type_desc))
         col_ddl = []
+        ddl.append(self.alter_table_ddl())
+        ddl.append('UNIQUE')
         for c in idx.columns:
             col_ddl.append('[%s] %s' % (c.column.name, 'DESC' if c.is_descending_key else 'ASC'))
         ddl.append('(%s)' % ', '.join(col_ddl))
         ddl.append('ON [%s]' % idx.data_space.name)
+        return ' '.join(ddl)
+
+class DbCheckConstraint(DbConstraintBase):
+    folder_name = ''
+
+    def ddl(self):
+        cc = SysCheckConstraint.get_by(parent_object_id=self.so.parent.id, name=self.name)
+        ddl = []
+        ddl.append(self.alter_table_ddl())
+        ddl.append('CHECK (%s)' % cc.definition)
         return ' '.join(ddl)
 
 _write_dirs = (
@@ -296,7 +348,7 @@ _write_dirs = (
     'functions'
 )
 
-def writeddl(dump_path):
+def writeddl(dump_path, print_names=True):
 
     if db.engine.dialect.name != 'mssql':
         raise Exception('ERROR: not connected to MSSQL database')
@@ -319,7 +371,8 @@ def writeddl(dump_path):
     )
     for obj in res:
         wr = obj.getwriter(dump_path)
-        print obj.name
+        if print_names:
+            print obj.name
         wr.write()
 
 #def writeddl():
