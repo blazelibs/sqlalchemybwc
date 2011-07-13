@@ -21,12 +21,20 @@ class DefaultColsMixin(object):
     updatedts = sa.Column(sa.DateTime, onupdate=datetime.now)
 
 class MethodsMixin(object):
+    # the object that the SA session should be pulled from
+    mm_db_global = db
+    # the name of the attribute representing the SA session
+    mm_db_sess_attr = 'sess'
+
+    @classmethod
+    def _sa_sess(cls):
+        return getattr(cls.mm_db_global, cls.mm_db_sess_attr)
 
     @transaction
     def add(cls, **kwargs):
         o = cls()
         o.from_dict(kwargs)
-        db.sess.add(o)
+        cls._sa_sess().add(o)
         return o
 
     @ignore_unique
@@ -59,7 +67,7 @@ class MethodsMixin(object):
 
     @classmethod
     def get(cls, oid):
-        return db.sess.query(cls).get(oid)
+        return cls._sa_sess().query(cls).get(oid)
 
     @one_to_none
     def get_by(cls, **kwargs):
@@ -69,7 +77,7 @@ class MethodsMixin(object):
 
         If multiple records are returned, an exception is raised.
         """
-        return db.sess.query(cls).filter_by(**kwargs).one()
+        return cls._sa_sess().query(cls).filter_by(**kwargs).one()
 
     @one_to_none
     def get_where(cls, clause, *extra_clauses):
@@ -80,15 +88,15 @@ class MethodsMixin(object):
         If multiple records are returned, an exception is raised.
         """
         where_clause = cls.combine_clauses(clause, extra_clauses)
-        return db.sess.query(cls).filter(where_clause).one()
+        return cls._sa_sess().query(cls).filter(where_clause).one()
 
     @classmethod
     def first(cls, order_by=None):
-        return cls.order_by_helper(db.sess.query(cls), order_by).first()
+        return cls.order_by_helper(cls._sa_sess().query(cls), order_by).first()
 
     @classmethod
     def first_by(cls, order_by=None, **kwargs):
-        return cls.order_by_helper(db.sess.query(cls), order_by).filter_by(**kwargs).first()
+        return cls.order_by_helper(cls._sa_sess().query(cls), order_by).filter_by(**kwargs).first()
 
     @classmethod
     def first_where(cls, clause, *extra_clauses, **kwargs):
@@ -96,15 +104,15 @@ class MethodsMixin(object):
         if kwargs:
             raise ValueError('order_by is the only acceptable keyword arg')
         where_clause = cls.combine_clauses(clause, extra_clauses)
-        return cls.order_by_helper(db.sess.query(cls), order_by).filter(where_clause).first()
+        return cls.order_by_helper(cls._sa_sess().query(cls), order_by).filter(where_clause).first()
 
     @classmethod
     def list(cls, order_by=None):
-        return cls.order_by_helper(db.sess.query(cls), order_by).all()
+        return cls.order_by_helper(cls._sa_sess().query(cls), order_by).all()
 
     @classmethod
     def list_by(cls, order_by=None, **kwargs):
-        return cls.order_by_helper(db.sess.query(cls), order_by).filter_by(**kwargs).all()
+        return cls.order_by_helper(cls._sa_sess().query(cls), order_by).filter_by(**kwargs).all()
 
     @classmethod
     def list_where(cls, clause, *extra_clauses, **kwargs):
@@ -112,7 +120,7 @@ class MethodsMixin(object):
         if kwargs:
             raise ValueError('order_by is the only acceptable keyword arg')
         where_clause = cls.combine_clauses(clause, extra_clauses)
-        return cls.order_by_helper(db.sess.query(cls), order_by).filter(where_clause).all()
+        return cls.order_by_helper(cls._sa_sess().query(cls), order_by).filter(where_clause).all()
 
     @classmethod
     def pairs(cls, fields, order_by=None, _result=None):
@@ -158,32 +166,32 @@ class MethodsMixin(object):
         if o is None:
             return False
 
-        db.sess.delete(o)
+        cls._sa_sess().delete(o)
         return True
 
     @transaction
     def delete_where(cls, clause, *extra_clauses):
         where_clause = cls.combine_clauses(clause, extra_clauses)
-        result = db.sess.execute(cls.__table__.delete().where(where_clause))
+        result = cls._sa_sess().execute(cls.__table__.delete().where(where_clause))
         return result.rowcount
 
     @transaction
     def delete_all(cls):
-        result = db.sess.execute(cls.__table__.delete())
+        result = cls._sa_sess().execute(cls.__table__.delete())
         return result.rowcount
 
     @classmethod
     def count(cls):
-        return db.sess.query(cls).count()
+        return cls._sa_sess().query(cls).count()
 
     @classmethod
     def count_by(cls, **kwargs):
-        return db.sess.query(cls).filter_by(**kwargs).count()
+        return cls._sa_sess().query(cls).filter_by(**kwargs).count()
 
     @classmethod
     def count_where(cls, clause, *extra_clauses):
         where_clause = cls.combine_clauses(clause, extra_clauses)
-        return db.sess.query(cls).filter(where_clause).count()
+        return cls._sa_sess().query(cls).filter(where_clause).count()
 
     def to_dict(self, exclude=[]):
         col_prop_names = self.sa_column_names()

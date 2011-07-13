@@ -5,12 +5,28 @@
 
         ncm => Non-Class Method
 """
+import inspect
 
 from decorator import decorator
 from sqlalchemy.orm.exc import NoResultFound
 
 from compstack.sqlalchemy import db
 from compstack.sqlalchemy.lib.helpers import is_unique_exc
+
+def _find_sa_sess(args):
+    """
+        The decorators will by default use sqlalchemy.db to find the SQLAlchemy
+        session.  However, if the function being decorated is a method of a
+        a class and that class has a _sa_sess() method, it will be called
+        to retrieve the SQLAlchemy session that should be used.
+
+        This function determins where the SA session is.
+    """
+    # If the function being decorated is a classmethod, and the class
+    # has an attribute _sa_sess,
+    if args and inspect.isclass(args[0]) and hasattr(args[0], '_sa_sess'):
+        return args[0]._sa_sess()
+    return db.sess
 
 @decorator
 def transaction_ncm(f, *args, **kwargs):
@@ -21,12 +37,14 @@ def transaction_ncm(f, *args, **kwargs):
 
         'ncm' = non class method (version)
     """
+    dbsess = _find_sa_sess(args)
+
     try:
         retval = f(*args, **kwargs)
-        db.sess.commit()
+        dbsess.commit()
         return retval
     except Exception:
-        db.sess.rollback()
+        dbsess.rollback()
         raise
 
 def transaction(f):
@@ -43,10 +61,11 @@ def ignore_unique_ncm(f, *args, **kwargs):
 
         'ncm' = non class method (version)
     """
+    dbsess = _find_sa_sess(args)
     try:
         return f(*args, **kwargs)
     except Exception, e:
-        db.sess.rollback()
+        dbsess.rollback()
         if is_unique_exc(e):
                 return
         raise
