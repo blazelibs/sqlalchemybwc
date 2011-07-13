@@ -40,8 +40,8 @@ class DebugSession(Session):
 
 class SQLAlchemyContainer(object):
 
-    def __init__(self):
-        self.engine = engine_from_config(dict(settings.db), prefix='')
+    def __init__(self, db_settings):
+        self.engine = engine_from_config(dict(db_settings), prefix='')
         self.meta = MetaData()
         self.Session = self.make_session()
         if settings.components.sqlalchemy.use_split_sessions:
@@ -77,14 +77,27 @@ class SQLAlchemyApp(object):
 
         Sets up thread-local sessions and cleans them up per request
     """
-    def __init__(self, application):
+
+    def __init__(self, application, visit_mods=True):
         self.application = application
-        self.container = SQLAlchemyContainer()
-        db._push_object(self.container)
-        visitmods('model.orm')
-        visitmods('model.entities')
-        visitmods('model.metadata')
-        visitmods('model.schema')
+        self.container = SQLAlchemyContainer(self.db_settings)
+        self.sop_obj._push_object(self.container)
+
+        # if using multiple DB connections, only the one highest in the wsgi
+        # stack should visit the mods.
+        if visit_mods:
+            visitmods('model.orm')
+            visitmods('model.entities')
+            visitmods('model.metadata')
+            visitmods('model.schema')
+
+    @property
+    def sop_obj(self):
+        return db
+
+    @property
+    def db_settings(self):
+        return settings.db
 
     def __call__(self, environ, start_response):
         # clear the session after every response cycle
@@ -94,7 +107,7 @@ class SQLAlchemyApp(object):
         environ['blazeweb.response_cycle_teardown'].append(response_cycle_teardown)
 
         # register the db variable for this request/thread
-        environ['paste.registry'].register(db, self.container)
+        environ['paste.registry'].register(self.sop_obj, self.container)
 
         # call the inner application
         return self.application(environ, start_response)
