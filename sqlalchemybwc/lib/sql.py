@@ -12,8 +12,8 @@ def run_component_sql(component, target, use_dialect=False):
     '''
 
     try:
-        if _run_dir_sql('%s:sql/%s' % (component, target)):
-            return
+        _run_dir_sql('%s:sql/%s' % (component, target))
+        return
     except FileNotFound:
         pass
 
@@ -66,8 +66,8 @@ def run_app_sql(target, use_dialect=False):
 
     '''
     try:
-        if _run_dir_sql('sql/%s' % target):
-            return
+        _run_dir_sql('sql/%s' % target)
+        return
     except FileNotFound:
         pass
 
@@ -79,33 +79,47 @@ def run_app_sql(target, use_dialect=False):
     _run_file_sql(relative_sql_path)
 
 def _run_dir_sql(rel_path):
+    for filename, sql_block in yield_blocks_from_dir(rel_path):
+        _execute_sql_block(sql_block)
+
+def _run_file_sql(relative_sql_path):
+    full_path = findfile(relative_sql_path)
+    with open(full_path, 'rb') as fh:
+        sql_file_contents = fh.read()
+    for sql_block in yield_sql_blocks(sql_file_contents):
+        _execute_sql_block(sql_block)
+
+def _execute_sql_block(sql):
+    try:
+        db.sess.execute(sql)
+    except Exception:
+        db.sess.rollback()
+        raise
+
+def yield_blocks_from_dir(rel_path):
+    """
+        yields blocks of SQL from sql files in a directory
+
+        rel_path: a path relative to the app's root
+    """
     dirpath = findfile(rel_path)
     if not path.isdir(dirpath):
-        return False
+        raise ValueError('path found, but "%s" is not a directory' % rel_path)
     for dirname, _, filenames in walk(dirpath):
         filenames.sort()
         for filename in filenames:
             if not filename.endswith('.sql'):
                 continue
             with open(path.join(dirname, filename), 'rb') as fh:
-                sql_str = fh.read()
-            line1, _ = sql_str.split('\n', 1)
+                sql_file_contents = fh.read()
+            line1, _ = sql_file_contents.split('\n', 1)
             if 'dialect-require:' not in line1 or db.engine.dialect.name in line1:
-                _execute_sql_string(sql_str)
-    return True
+                print 'processing: %s' % filename
+                for sql_block in yield_sql_blocks(sql_file_contents):
+                    yield filename, sql_block
 
-def _run_file_sql(relative_sql_path):
-    full_path = findfile(relative_sql_path)
-    with open(full_path, 'rb') as fh:
-        sql_str = fh.read()
-    _execute_sql_string(sql_str)
-
-def _execute_sql_string(sql):
-    try:
-        for statement in sql.split('--statement-break'):
-            statement.strip()
-            if statement:
-                db.sess.execute(statement)
-    except Exception:
-        db.sess.rollback()
-        raise
+def yield_sql_blocks(file_contents):
+    for sql_block in file_contents.split('--statement-break'):
+        sql_block = sql_block.strip()
+        if sql_block:
+            yield sql_block
