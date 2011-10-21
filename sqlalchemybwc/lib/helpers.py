@@ -211,3 +211,29 @@ def clear_db():
     else:
         return False
     return True
+
+def clear_db_data():
+    dialect_name = db.engine.dialect.name
+    if dialect_name == 'postgresql':
+        select_sql = """
+            SELECT table_schema, table_name
+            FROM information_schema.tables
+            WHERE table_schema NOT IN('pg_catalog', 'information_schema')
+            AND table_type = 'BASE TABLE'
+        """
+        truncate_sql = """
+            TRUNCATE {0[table_schema]}.{0[table_name]} CASCADE
+        """
+        for row in db.sess.execute(select_sql):
+            try:
+                db.sess.execute(truncate_sql.format(row))
+            except Exception, e:
+                raise
+                print 'WARNING: %s' % e
+    elif dialect_name == 'sqlite':
+       raise Exception('clear_db_data() does not yet support sqlite')
+    elif dialect_name == 'mssql':
+        raise Exception('clear_db_data() does not yet support mssql')
+    else:
+        raise Exception('clear_db_data() does not yet support {0}'.format(dialect_name))
+    return True
