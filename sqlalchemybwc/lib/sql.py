@@ -5,6 +5,9 @@ from os import path, walk
 from blazeweb.hierarchy import findfile, FileNotFound
 from compstack.sqlalchemy import db
 
+class NotDirectoryExc(Exception):
+    pass
+
 def run_component_sql(component, target, use_dialect=False):
     ''' see docs for run_app_sql(): usage is the same, execpt for the `component`
         parameter which should be a string representing the name of the
@@ -14,7 +17,7 @@ def run_component_sql(component, target, use_dialect=False):
     try:
         _run_dir_sql('%s:sql/%s' % (component, target))
         return
-    except FileNotFound:
+    except (FileNotFound, NotDirectoryExc):
         pass
 
     if use_dialect:
@@ -68,7 +71,7 @@ def run_app_sql(target, use_dialect=False):
     try:
         _run_dir_sql('sql/%s' % target)
         return
-    except FileNotFound:
+    except (FileNotFound, NotDirectoryExc):
         pass
 
     if use_dialect:
@@ -104,7 +107,7 @@ def yield_blocks_from_dir(rel_path):
     """
     dirpath = findfile(rel_path)
     if not path.isdir(dirpath):
-        raise ValueError('path found, but "%s" is not a directory' % rel_path)
+        raise NotDirectoryExc('path found, but "%s" is not a directory' % rel_path)
     for dirname, _, filenames in walk(dirpath):
         filenames.sort()
         for filename in filenames:
