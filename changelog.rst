@@ -1,6 +1,12 @@
 Change Log
 ===========
 
+0.2.4 released 2011-11-09
+-------------------------
+ - **BC BREAK**: changing LookupMixin.test_create() to .testing_create()
+ - convert sql processing to use generators
+ - add lib/helpers.py:clear_db_data(), only postgres supported currently
+
 0.2.3 released 2011-07-16
 -----------------------------
  - Facilitate use by non-default SA engine.  Enables a project to have two
