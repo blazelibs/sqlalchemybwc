@@ -279,7 +279,7 @@ class LookupMixin(DefaultMixin):
     active_flag = sa.Column(SmallIntBool, nullable=False, server_default=sasql.text('1'))
 
     @classmethod
-    def test_create(cls, label=None, active=True):
+    def testing_create(cls, label=None, active=True):
         if label is None:
             label = u'%s %s' % (cls.__name__, randchars(5))
         return cls.add(label=label, active_flag=active)
