@@ -1,6 +1,11 @@
 Change Log
 ===========
 
+0.2.5 released ???
+-------------------------
+
+ - ???
+
 0.2.4 released 2011-11-09
 -------------------------
  - **BC BREAK**: changing LookupMixin.test_create() to .testing_create()
