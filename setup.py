@@ -23,7 +23,7 @@ from setuptools import setup, find_packages
 
 # has to be here b/c importing from the package gives us an import error if
 # the venv isn't active
-version = '0.2.3'
+version = '0.2.5'
 
 setup(
     name='SQLAlchemyBWC',
