@@ -479,8 +479,8 @@ def test_update():
 def test_lookup_object():
     CT = CustomerType
     c1 = CT.add(label=u'one')
-    c2 = CT.test_create(u'two')
-    c3 = CT.test_create(u'three', False)
+    c2 = CT.testing_create(u'two')
+    c3 = CT.testing_create(u'three', False)
 
     eq_([c2, c1], CT.list_active(order_by=CT.id.desc()))
     eq_([c1, c2], CT.list_active())
