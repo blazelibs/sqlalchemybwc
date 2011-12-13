@@ -44,6 +44,8 @@ setup(
     install_requires=[
         'BlazeWeb>=0.3.0',
         'savalidation>=0.1',
-        'SQLiteFKTG4SA>=0.1.1'
+        # SQLiteFKTG4SA includes SA, so we need to specify a version first
+        'SQLAlchemy<=0.6.999',
+        'SQLiteFKTG4SA>=0.1.1',
     ],
 )
