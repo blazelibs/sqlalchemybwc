@@ -20,6 +20,15 @@ is installable via `easy_install` with ``easy_install sqlalchemybwc==dev``
 """
 
 from setuptools import setup, find_packages
+from setuptools.command.develop import develop as STDevelopCmd
+
+class DevelopCmd(STDevelopCmd):
+    def run(self):
+        # add in requirements for testing only when using the develop command
+        self.distribution.install_requires.extend([
+            'WebTest',
+        ])
+        STDevelopCmd.run(self)
 
 # has to be here b/c importing from the package gives us an import error if
 # the venv isn't active
@@ -41,6 +50,7 @@ setup(
     license='BSD',
     packages=find_packages(exclude=['ez_setup']),
     zip_safe=False,
+    cmdclass = {'develop': DevelopCmd},
     install_requires=[
         'BlazeWeb>=0.3.0',
         'savalidation>=0.1',
