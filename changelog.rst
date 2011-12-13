@@ -1,10 +1,11 @@
 Change Log
 ===========
 
-0.2.5 released ???
+0.2.5 released 2011-12-13
 -------------------------
 
- - ???
+ - fix problem in requirements that would result in conflicting SQLAlchemy
+    versions
 
 0.2.4 released 2011-11-09
 -------------------------
