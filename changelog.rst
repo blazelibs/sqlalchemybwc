@@ -1,6 +1,12 @@
 Change Log
 ===========
 
+
+0.2.5 released ???
+-------------------------
+
+ - added assert_raises_*_exc() decorators for testing
+
 0.2.5 released 2011-12-13
 -------------------------
 

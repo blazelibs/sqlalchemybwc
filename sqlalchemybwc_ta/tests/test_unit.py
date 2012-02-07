@@ -1,12 +1,15 @@
+from blazeutils.testing import raises
 from nose.tools import eq_
 from sqlalchemybwc import db
-from sqlalchemybwc.lib.decorators import one_to_none_ncm
+from sqlalchemybwc.lib.decorators import one_to_none_ncm, \
+    assert_raises_null_or_fk_exc, assert_raises_null_exc, assert_raises_fk_exc
 from sqlalchemybwc.lib.helpers import is_unique_exc, _is_unique_msg, \
     _is_unique_error_saval, _is_null_msg, _is_fk_msg, _is_check_const
 from sqlalchemybwc.lib.sql import run_app_sql, run_component_sql
 
 from sqlalchemybwc_ta.model.orm import UniqueRecord, OneToNone, Car, \
     UniqueRecordTwo, Truck, CustomerType, NoDefaults, declarative_base
+from sqlalchemybwc_ta.model.entities import Blog, Comment
 
 def test_ignore_unique():
     assert UniqueRecord.add(u'test_ignore_unique')
@@ -558,3 +561,73 @@ class TestSQLRunFuncs(object):
         run_component_sql('foo', 'run_dir_test')
         eq_(Truck.count(), 2)
         trucks = Truck.list()
+
+class TestAssertRaisesDecorators(object):
+
+    def setUp(self):
+        Comment.delete_all()
+        Blog.delete_all()
+
+    @assert_raises_null_or_fk_exc('name', 'n/a')
+    def test_ARNFKE_with_null_exc(self):
+        UniqueRecord.add(name=None)
+
+    @assert_raises_null_exc('name')
+    def test_ARNE_with_null_exc2(self):
+        UniqueRecord.add(name=None)
+
+    @raises(ValueError, 'passthru')
+    def test_ARNE_exc_passthrough(self):
+        @assert_raises_null_exc('n/a')
+        def inner():
+            raise ValueError('passthru')
+        inner()
+
+    @raises(ValueError, 'passthru')
+    def test_ARNFKE_exc_passthrough(self):
+        @assert_raises_null_or_fk_exc('n/a', 'n/a')
+        def inner():
+            raise ValueError('passthru')
+        inner()
+
+    @raises(ValueError, 'passthru')
+    def test_ARFKE_exc_passthrough(self):
+        @assert_raises_fk_exc('n/a', 'n/a')
+        def inner():
+            raise ValueError('passthru')
+        inner()
+
+    @raises(AssertionError, 'expected null exception to be raised')
+    def test_ARNE_exc_expected(self):
+        @assert_raises_null_exc('n/a')
+        def inner():
+            pass
+        inner()
+
+    @raises(AssertionError, 'expected null or FK exception to be raised')
+    def test_ARNFKE_exc_expected(self):
+        @assert_raises_null_or_fk_exc('n/a', 'n/a')
+        def inner():
+            pass
+        inner()
+
+    @raises(AssertionError, 'expected FK exception to be raised')
+    def test_ARFKE_exc_expected(self):
+        @assert_raises_fk_exc('n/a', 'n/a')
+        def inner():
+            pass
+        inner()
+
+    @assert_raises_null_or_fk_exc('blog_ident', 'ident')
+    def test_ARNFKE_with_either_exc(self):
+        # this test will generate the FK exception for SQLite
+        # but a NULL exception for other DBs
+        Comment.add(blog_ident=None)
+
+    @assert_raises_null_or_fk_exc('blog_ident', 'ident')
+    def test_ARNFKE_with_fk_exc(self):
+        Comment.add(blog_ident='abcdefg')
+
+    @assert_raises_fk_exc('blog_ident', 'ident')
+    def test_ARFKE(self):
+        Comment.add(blog_ident='abcdefg')
