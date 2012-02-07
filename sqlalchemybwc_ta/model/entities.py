@@ -18,4 +18,4 @@ class Blog(Base, DefaultMixin):
 class Comment(Base, DefaultMixin):
     __tablename__ = 'comments'
 
-    blog_ident = sa.Column(sa.String(12), sa.ForeignKey('blogs.ident'))
+    blog_ident = sa.Column(sa.String(12), sa.ForeignKey('blogs.ident'), nullable=False)

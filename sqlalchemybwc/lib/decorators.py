@@ -5,13 +5,14 @@
 
         ncm => Non-Class Method
 """
+from functools import wraps
 import inspect
 
 from decorator import decorator
 from sqlalchemy.orm.exc import NoResultFound
 
 from compstack.sqlalchemy import db
-from compstack.sqlalchemy.lib.helpers import is_unique_exc
+from compstack.sqlalchemy.lib.helpers import is_unique_exc, is_null_exc, is_fk_exc
 
 def _find_sa_sess(args):
     """
@@ -95,3 +96,66 @@ def one_to_none(f):
         like one_to_none_ncm() but makes the decorated function a class method
     """
     return classmethod(one_to_none_ncm(f))
+
+def assert_raises_null_or_fk_exc(column_name, ref_column_name):
+    """
+        Supresses null or fk exceptions, raises assertion error if no exception
+        raised.
+
+        This is useful when testing non-null columns on SQLite when using
+        triggers to enforce foreign keys.
+    """
+    def decorator(f):
+        @wraps(f)
+        def inner(*args, **kwargs):
+            dbsess = _find_sa_sess(args)
+            try:
+                f(*args, **kwargs)
+                assert False, 'expected null or FK exception to be raised'
+            except Exception, e:
+                dbsess.rollback()
+                if is_null_exc(e, column_name) or is_fk_exc(e, column_name, ref_column_name):
+                    return
+                raise
+        return inner
+    return decorator
+
+def assert_raises_null_exc(column_name):
+    """
+        Supresses null exceptions, raises assertion error if no exception
+        raised.
+    """
+    def decorator(f):
+        @wraps(f)
+        def inner(*args, **kwargs):
+            dbsess = _find_sa_sess(args)
+            try:
+                f(*args, **kwargs)
+                assert False, 'expected null exception to be raised'
+            except Exception, e:
+                dbsess.rollback()
+                if is_null_exc(e, column_name):
+                    return
+                raise
+        return inner
+    return decorator
+
+def assert_raises_fk_exc(column_name, ref_column_name):
+    """
+        Supresses fk exceptions, raises assertion error if no exception
+        raised.
+    """
+    def decorator(f):
+        @wraps(f)
+        def inner(*args, **kwargs):
+            dbsess = _find_sa_sess(args)
+            try:
+                f(*args, **kwargs)
+                assert False, 'expected FK exception to be raised'
+            except Exception, e:
+                dbsess.rollback()
+                if is_fk_exc(e, column_name, ref_column_name):
+                    return
+                raise
+        return inner
+    return decorator
