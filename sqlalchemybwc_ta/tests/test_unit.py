@@ -296,7 +296,7 @@ def test_count_and_delete_all():
     assert Car.count() == 3
     assert Car.count_by(model=u'count') == 2
     assert Car.count_where(Car.model == u'count') == 2
-    assert Car.delete_all() == 3
+    eq_(Car.delete_all(), 3)
 
 def test_delete_where():
     Car.delete_all()
