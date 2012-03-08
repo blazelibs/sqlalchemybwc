@@ -30,6 +30,15 @@ class MethodsMixin(object):
     def _sa_sess(cls):
         return getattr(cls.mm_db_global, cls.mm_db_sess_attr)
 
+    @classmethod
+    def query(cls, *args):
+        if args:
+            entities = [getattr(cls, aname) for aname in args]
+        else:
+            entities = [cls]
+        return cls._sa_sess().query(*entities)
+
+
     @transaction
     def add(cls, **kwargs):
         o = cls()
@@ -172,13 +181,11 @@ class MethodsMixin(object):
     @transaction
     def delete_where(cls, clause, *extra_clauses):
         where_clause = cls.combine_clauses(clause, extra_clauses)
-        result = cls._sa_sess().execute(cls.__table__.delete().where(where_clause))
-        return result.rowcount
+        return cls._sa_sess().query(cls).filter(where_clause).delete()
 
     @transaction
     def delete_all(cls):
-        result = cls._sa_sess().execute(cls.__table__.delete())
-        return result.rowcount
+        return cls._sa_sess().query(cls).delete()
 
     @classmethod
     def count(cls):
