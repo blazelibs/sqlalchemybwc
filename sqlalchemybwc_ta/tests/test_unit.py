@@ -6,6 +6,7 @@ from sqlalchemybwc.lib.decorators import one_to_none_ncm, \
 from sqlalchemybwc.lib.helpers import is_unique_exc, _is_unique_msg, \
     _is_unique_error_saval, _is_null_msg, _is_fk_msg, _is_check_const
 from sqlalchemybwc.lib.sql import run_app_sql, run_component_sql
+from sqlalchemybwc.lib.testing import query_to_str
 
 from sqlalchemybwc_ta.model.orm import UniqueRecord, OneToNone, Car, \
     UniqueRecordTwo, Truck, CustomerType, NoDefaults, declarative_base
@@ -631,3 +632,11 @@ class TestAssertRaisesDecorators(object):
     @assert_raises_fk_exc('blog_ident', 'ident')
     def test_ARFKE(self):
         Comment.add(blog_ident='abcdefg')
+
+class TestTestingHelpers(object):
+
+    def test_query_to_str(self):
+        q = db.sess.query(Blog)
+        query_str = query_to_str(q)
+        assert 'SELECT' in query_str
+        assert 'FROM blogs' in query_str
