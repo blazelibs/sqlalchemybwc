@@ -266,7 +266,7 @@ def declarative_base(*args, **kwargs):
     """
     if not hasattr(ag, 'sabwp_declarative_base'):
         kwargs.setdefault('metadata', db.meta)
-        ag.sabwp_declarative_base = saval.declarative_base(*args, **kwargs)
+        ag.sabwp_declarative_base = sadec.declarative_base(*args, **kwargs)
     return ag.sabwp_declarative_base
 
 ###
