@@ -2,7 +2,6 @@ from blazeweb.globals import settings, rg
 from blazeweb.hierarchy import visitmods
 from blazeweb.utils import registry_has_object
 from paste.registry import StackedObjectProxy
-from savalidation import ValidatingSessionExtension
 from sqlalchemy import engine_from_config, MetaData
 from sqlalchemy.orm import sessionmaker, scoped_session, Session
 
@@ -50,7 +49,6 @@ class SQLAlchemyContainer(object):
     def make_session(self, dbg_label = None):
         sm_kwargs = {
             'bind': self.engine,
-            'extension': ValidatingSessionExtension(),
         }
         if dbg_label:
             sess_inst = sessionmaker(
