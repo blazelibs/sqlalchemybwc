@@ -299,6 +299,34 @@ def test_count_and_delete_all():
     assert Car.count_where(Car.model == u'count') == 2
     eq_(Car.delete_all(), 3)
 
+def test_query_attribute():
+    Car.delete_all()
+    c = Car.add(**{
+        'make': u'test',
+        'model': u'count',
+        'year': 2010
+    })
+    assert Car.query().count() == 1
+
+    # default usage should return all attributes
+    c = Car.query().first()
+    assert isinstance(c, Car)
+    assert c.id
+    assert c.make
+    assert c.model
+
+    # sending attribute names should give us a recordset with just those
+    # attributes
+    res = Car.query('id', 'make').first()
+    assert not isinstance(res, Car)
+    assert res.id
+    assert res.make
+    try:
+        assert res.model
+        assert False, 'expected exception'
+    except AttributeError:
+        pass
+
 def test_delete_where():
     Car.delete_all()
     c = Car.add(**{
