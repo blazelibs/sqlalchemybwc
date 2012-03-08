@@ -117,7 +117,6 @@ def yield_blocks_from_dir(rel_path):
                 sql_file_contents = fh.read()
             line1, _ = sql_file_contents.split('\n', 1)
             if 'dialect-require:' not in line1 or db.engine.dialect.name in line1:
-                print 'processing: %s' % filename
                 for sql_block in yield_sql_blocks(sql_file_contents):
                     yield filename, sql_block
 
