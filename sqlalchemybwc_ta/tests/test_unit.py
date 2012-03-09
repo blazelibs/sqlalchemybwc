@@ -1,5 +1,6 @@
 from blazeutils.testing import raises
 from nose.tools import eq_
+import sqlalchemy.sql as sasql
 from sqlalchemybwc import db
 from sqlalchemybwc.lib.decorators import one_to_none_ncm, \
     assert_raises_null_or_fk_exc, assert_raises_null_exc, assert_raises_fk_exc
@@ -663,17 +664,25 @@ class TestAssertRaisesDecorators(object):
 
 class TestTestingHelpers(object):
 
-    def test_query_to_str(self):
-        q = db.sess.query(Blog)
+    def test_query_to_str_with_query(self):
+        q = db.sess.query(Blog).filter(Blog.title == u'foo').limit(10).offset(5)
         query_str = query_to_str(q)
         assert 'SELECT' in query_str
         assert 'FROM blogs' in query_str
-
-    def test_query_to_str_with_limit_offset(self):
-        q = db.sess.query(Blog).limit('10').offset(5)
-        query_str = query_to_str(q)
-        assert 'SELECT' in query_str
-        assert 'FROM blogs' in query_str
-        assert 'LIMIT 10' in query_str
+        assert 'WHERE blogs.title = \'foo\''
+        assert 'LIMIT 10' in query_str, query_str
         assert 'OFFSET 5' in query_str
-        assert False, query_str
+
+    def test_query_to_str_with_stmt(self):
+        stmt = Blog.__table__.select().where(Blog.title == u'foo').limit(10).offset(5)
+        stmt_str = query_to_str(stmt, db.engine)
+        assert 'SELECT' in stmt_str
+        assert 'FROM blogs' in stmt_str
+        assert 'WHERE blogs.title = \'foo\''
+        assert 'LIMIT 10' in stmt_str, stmt_str
+        assert 'OFFSET 5' in stmt_str
+
+    @raises('bind param (engine or connection object) required when using with an unbound statement')
+    def test_query_to_str_without_bind(self):
+        stmt = Blog.__table__.select()
+        stmt_str = query_to_str(stmt)

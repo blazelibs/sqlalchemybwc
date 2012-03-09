@@ -1,16 +1,23 @@
 import sqlalchemy.orm
 
-def query_to_str(query):
+def query_to_str(statement, bind=None):
     """
         returns a string of a sqlalchemy.orm.Query with parameters bound
 
         WARNING: this is dangerous and ONLY for testing, executing the results
         of this function can result in an SQL Injection attack.
     """
-    bind = query.session.get_bind(
-            query._mapper_zero_or_none()
-    )
-    statement = query.statement
+    if isinstance(statement, sqlalchemy.orm.Query):
+        if bind is None:
+            bind = statement.session.get_bind(
+                    statement._mapper_zero_or_none()
+            )
+        statement = statement.statement
+    elif bind is None:
+        bind = statement.bind
+
+    if bind is None:
+        raise Exception('bind param (engine or connection object) required when using with an unbound statement')
 
     dialect = bind.dialect
     compiler = statement._compiler(dialect)
