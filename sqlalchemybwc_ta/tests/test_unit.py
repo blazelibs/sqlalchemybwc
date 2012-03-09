@@ -668,3 +668,12 @@ class TestTestingHelpers(object):
         query_str = query_to_str(q)
         assert 'SELECT' in query_str
         assert 'FROM blogs' in query_str
+
+    def test_query_to_str_with_limit_offset(self):
+        q = db.sess.query(Blog).limit('10').offset(5)
+        query_str = query_to_str(q)
+        assert 'SELECT' in query_str
+        assert 'FROM blogs' in query_str
+        assert 'LIMIT 10' in query_str
+        assert 'OFFSET 5' in query_str
+        assert False, query_str
