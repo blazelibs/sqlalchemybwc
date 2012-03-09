@@ -178,7 +178,10 @@ def clear_db():
         # drop the views
         sql = "select name from sqlite_master where type='view'"
         rows = db.engine.execute(sql)
-        for row in rows:
+        # need to get all views before start to try and delete them, otherwise
+        # we will get "database locked" errors from sqlite
+        records = rows.fetchall()
+        for row in records:
             db.engine.execute('drop view %s' % row['name'])
 
         # drop the tables
