@@ -31,6 +31,6 @@ class _UniqueValidationHandler(ValidatorBase):
                 cls = self.entitycls,
                 fieldname = field_to_validate
             )
-            self.add_field_validator(field_to_validate, valinst)
+            self.create_fev_meta(valinst, field_to_validate)
 
 validates_unique = EntityLinker(_UniqueValidationHandler)
