@@ -1,11 +1,11 @@
 Change Log
 ===========
 
-
-0.2.5 released ???
+0.2.6 released 2012-10-24
 -------------------------
 
  - added assert_raises_*_exc() decorators for testing
+ - update SAValidation dependency to >= 0.2.0
 
 0.2.5 released 2011-12-13
 -------------------------

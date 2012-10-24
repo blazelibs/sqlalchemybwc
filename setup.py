@@ -15,7 +15,7 @@ Current Status
 
 The code stays pretty stable, but the API may change in the future.
 
-The `SQLAlchemyBWC tip <http://bitbucket.org/rsyring/sqlalchemybwc/get/tip.zip#egg=sqlalchemybwc-dev>`_
+The `SQLAlchemyBWC tip <http://bitbucket.org/blazelibs/sqlalchemybwc/get/tip.zip#egg=sqlalchemybwc-dev>`_
 is installable via `easy_install` with ``easy_install sqlalchemybwc==dev``
 """
 
@@ -46,14 +46,14 @@ setup(
     ],
     author='Randy Syring',
     author_email='rsyring@gmail.com',
-    url='http://bitbucket.org/rsyring/sqlalchemybwc/',
+    url='http://bitbucket.org/blazelibs/sqlalchemybwc/',
     license='BSD',
     packages=find_packages(exclude=['ez_setup']),
     zip_safe=False,
     cmdclass = {'develop': DevelopCmd},
     install_requires=[
         'BlazeWeb>=0.3.0',
-        'SAValidation ==dev, >=0.2',
+        'SAValidation >=0.2.0',
         'SQLiteFKTG4SA>=0.1.1',
     ],
 )
