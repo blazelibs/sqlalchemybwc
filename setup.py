@@ -32,7 +32,7 @@ class DevelopCmd(STDevelopCmd):
 
 # has to be here b/c importing from the package gives us an import error if
 # the venv isn't active
-version = '0.2.7'
+version = '0.2.8'
 
 setup(
     name='SQLAlchemyBWC',
