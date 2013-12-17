@@ -1,7 +1,7 @@
 Change Log
 ===========
 
-0.2.7 released ???
+0.2.7 released 2013-12-17
 -------------------------
 
  - adjust declarative order_by_helper() to not assume an id column but use primary keys instead
