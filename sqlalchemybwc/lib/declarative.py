@@ -6,6 +6,7 @@ from blazeweb.globals import ag
 import savalidation as saval
 import sqlalchemy as sa
 import sqlalchemy.ext.declarative as sadec
+from sqlalchemy.inspection import inspect as sa_inspect
 import sqlalchemy.orm as saorm
 import sqlalchemy.sql as sasql
 from sqlalchemy.util import classproperty
@@ -250,7 +251,8 @@ class MethodsMixin(object):
     def order_by_helper(cls, query, order_by):
         if order_by is not None:
             return query.order_by(*tolist(order_by))
-        return query.order_by(cls.id)
+        pk_cols = sa_inspect(cls).primary_key
+        return query.order_by(*pk_cols)
 
     @classmethod
     def combine_clauses(cls, clause, extra_clauses):
