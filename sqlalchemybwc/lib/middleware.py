@@ -42,7 +42,10 @@ class DebugSession(Session):
 class SQLAlchemyContainer(object):
 
     def __init__(self, db_settings):
-        self.engine = engine_from_config(dict(db_settings), prefix='')
+        if db_settings.url:
+            self.engine = engine_from_config(dict(db_settings), prefix='')
+        else:
+            self.engine = None
         self.meta = MetaData()
         self.Session = self.make_session()
         if settings.components.sqlalchemy.use_split_sessions:
