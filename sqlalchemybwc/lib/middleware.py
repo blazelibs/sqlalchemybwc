@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session, Session
 
 db = StackedObjectProxy(name="db")
 
+
 class DebugSession(Session):
     """
         This was helpful in troubleshooting a deadlock condition that
@@ -37,6 +38,7 @@ class DebugSession(Session):
         finally:
             print '<<<C'
 
+
 class SQLAlchemyContainer(object):
 
     def __init__(self, db_settings):
@@ -46,14 +48,14 @@ class SQLAlchemyContainer(object):
         if settings.components.sqlalchemy.use_split_sessions:
             self.AppLevelSession = self.make_session()
 
-    def make_session(self, dbg_label = None):
+    def make_session(self, dbg_label=None):
         sm_kwargs = {
             'bind': self.engine,
         }
         if dbg_label:
             sess_inst = sessionmaker(
-                class_ = DebugSession,
-                dbg_label = dbg_label,
+                class_=DebugSession,
+                dbg_label=dbg_label,
                 **sm_kwargs
             )
         else:
@@ -68,6 +70,7 @@ class SQLAlchemyContainer(object):
     @property
     def sess(self):
         return self.get_scoped_session_class()
+
 
 class SQLAlchemyApp(object):
     """
