@@ -273,10 +273,12 @@ def declarative_base(*args, **kwargs):
         creates a Base class for declarative objects or returns the class that
         has allready been created for the current application instance.
     """
-    if not hasattr(ag, 'sabwp_declarative_base'):
+    ident = kwargs.pop('ident', 'default')
+    ag_attr_name = 'sabwp_declarative_base_{0}'.format(ident)
+    if not hasattr(ag, ag_attr_name):
         kwargs.setdefault('metadata', db.meta)
-        ag.sabwp_declarative_base = sadec.declarative_base(*args, **kwargs)
-    return ag.sabwp_declarative_base
+        setattr(ag, ag_attr_name, sadec.declarative_base(*args, **kwargs))
+    return getattr(ag, ag_attr_name)
 
 ###
 ### Lookup Functionality
