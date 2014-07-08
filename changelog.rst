@@ -4,7 +4,8 @@ Change Log
 0.2.8 released <next>
 -------------------------
 
--
+- fix problem when metadata "sticking" when using multiple databases
+- SQLAlchemyContainer can now handle None for a URL and won't throw an exception
 
 0.2.7 released 2013-12-17
 -------------------------
