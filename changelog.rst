@@ -1,11 +1,12 @@
 Change Log
 ===========
 
-0.2.8 released <next>
+0.2.8 released 2014-07-08
 -------------------------
 
 - fix problem when metadata "sticking" when using multiple databases
 - SQLAlchemyContainer can now handle None for a URL and won't throw an exception
+- add .lib.sql.SQLLoader() to be a more flexible option than the other functions in that module
 
 0.2.7 released 2013-12-17
 -------------------------

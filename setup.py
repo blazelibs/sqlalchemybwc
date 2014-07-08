@@ -22,6 +22,7 @@ is installable via `easy_install` with ``easy_install SQLAlchemyBWC==dev``
 from setuptools import setup, find_packages
 from setuptools.command.develop import develop as STDevelopCmd
 
+
 class DevelopCmd(STDevelopCmd):
     def run(self):
         # add in requirements for testing only when using the develop command
@@ -40,9 +41,9 @@ setup(
     description="An SQLAlchemy component for the BlazeWeb applications",
     long_description=__doc__,
     classifiers=[
-    'Development Status :: 4 - Beta',
-    'Intended Audience :: Developers',
-    'License :: OSI Approved :: BSD License',
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
     ],
     author='Randy Syring',
     author_email='rsyring@gmail.com',
@@ -50,8 +51,9 @@ setup(
     license='BSD',
     packages=find_packages(exclude=['ez_setup']),
     zip_safe=False,
-    cmdclass = {'develop': DevelopCmd},
+    cmdclass={'develop': DevelopCmd},
     install_requires=[
+        'pathlib',
         'BlazeWeb>=0.3.0',
         'SAValidation >=0.2.0',
         'SQLiteFKTG4SA>=0.1.1',
