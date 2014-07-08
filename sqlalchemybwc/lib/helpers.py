@@ -202,10 +202,9 @@ def clear_db():
             'U': 'drop table [%(name)s]',
         }
         delete_sql = []
-        to_repeat_sql = []
         for type, drop_sql in mapping.iteritems():
             sql = 'select name, object_name( parent_object_id ) as parent_name '\
-                'from sys.objects where type in (\'%s\')' % '", "'.join(type)
+                'from sys.objects where type in (\'%s\')' % "', '".join(type)
             rows = db.engine.execute(sql)
             for row in rows:
                 delete_sql.append(drop_sql % dict(row))

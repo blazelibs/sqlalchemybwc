@@ -4,6 +4,7 @@ from os import path, walk
 
 from blazeweb.hierarchy import findfile, FileNotFound
 from compstack.sqlalchemy import db
+from pathlib import Path
 
 class NotDirectoryExc(Exception):
     pass
@@ -125,3 +126,38 @@ def yield_sql_blocks(file_contents):
         sql_block = sql_block.strip()
         if sql_block:
             yield sql_block
+
+
+class SQLLoader(object):
+    """
+        Similiar to functions above, just want to be able to load a SQL file or directory with
+        SQL files.  However, this class is more
+    """
+    def __init__(self, fsroot):
+        """
+            fsroot can be a string which represents a file system path.
+
+            Eventually, it should also be able to be a callable which will resolve the relative
+            path given to load().  The idea being that we can use findfile() and move most of the
+            logic in the above functions into this more flexible class.
+
+        """
+        self.rootpath = Path(fsroot)
+
+    def load(self, rel_fs_path):
+        """
+            rel_fs_path is a relative path (with reference to fsroot) of a .sql file or directory
+            containing .sql files (not implimented yet).
+        """
+        fspath = self.rootpath.joinpath(rel_fs_path)
+        if fspath.is_dir():
+            # this will throw an error, it's not built yet :)
+            self._loaddir(fspath)
+        else:
+            self._loadfile(fspath)
+
+    def _loadfile(self, fspath):
+        with fspath.open('rb') as fh:
+            sql_file_contents = fh.read()
+            for sql_block in yield_sql_blocks(sql_file_contents):
+                _execute_sql_block(sql_block)
