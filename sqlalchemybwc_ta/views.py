@@ -1,3 +1,4 @@
+from blazeweb.globals import user
 from blazeweb.views import View
 
 from sqlalchemybwc_ta.model.orm import Car
@@ -11,4 +12,11 @@ class Index(View):
             'model': u'taurus',
             'year': 2010
         })
+        
         return 'Index Page'
+
+
+class BeakerTest(View):
+    def default(self):
+        # need to touch the session for testing beaker
+        user.foo = 'bar'

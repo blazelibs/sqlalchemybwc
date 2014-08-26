@@ -1,7 +1,7 @@
 from os import path
 
 from blazeweb.application import WSGIApp
-from blazeweb.middleware import minimal_wsgi_stack
+from blazeweb.middleware import full_wsgi_stack
 from blazeweb.scripting import application_entry
 from sqlalchemybwc.lib.middleware import SQLAlchemyApp
 
@@ -12,7 +12,7 @@ def make_wsgi(profile='Dev'):
 
     app = SQLAlchemyApp(app)
 
-    return minimal_wsgi_stack(app)
+    return full_wsgi_stack(app)
 
 def script_entry():
     application_entry(make_wsgi)
