@@ -10,11 +10,14 @@ class Default(DefaultSettings):
         self.dirs.base = basedir
         self.app_package = app_package
         DefaultSettings.init(self)
+        
+        self.beaker.enabled = False
 
         self.add_component(app_package, 'foo')
         self.add_component(app_package, 'sqlalchemy', 'sqlalchemybwc')
 
         self.add_route('/', 'Index')
+        self.add_route('/beaker-test', 'BeakerTest')
 
 class Dev(Default):
     def init(self):
@@ -42,6 +45,22 @@ class SplitSessionsTest(Default):
         self.db.url = 'sqlite://'
 
         self.components.sqlalchemy.use_split_sessions = True
+
+
+class BeakerSessionTest(Default):
+    def init(self):
+        Default.init(self)
+        self.apply_test_settings()
+
+        #self.db.url = 'mssql://sa:xpstinks@127.0.0.1:54347/test_stage2?has_window_funcs=1'
+        self.db.url = 'sqlite:///test_beaker.db'
+
+        self.beaker.enabled = True
+        self.beaker.type = 'ext:database'
+        self.beaker.cookie_expires = True
+        self.beaker.timeout = 60*30
+        self.beaker.url = self.db.url
+
 
 try:
     from site_settings import *
