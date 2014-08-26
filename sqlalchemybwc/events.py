@@ -9,7 +9,7 @@ def setup_db_structure(sender):
 signal('blazeweb.pre_test_init').connect(setup_db_structure)
 
 
-def clear_old_beaker_sessions(self):
+def clear_old_beaker_sessions(sender):
     # clear up old beaker sessions, if needed
     if (
         settings.beaker.enabled and 
