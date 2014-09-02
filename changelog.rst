@@ -1,11 +1,13 @@
 Change Log
 ===========
 
-0.2.9 released ???
+0.2.9 released 2014-08-29
 -------------------------
 
  - add auto-cleanup of beaker sessions for database storage (if applicable).
-    settings.beaker.auto_clear_sessions (default True) controls this function
+   settings.beaker.auto_clear_sessions (default True) controls this function
+ - handle new format for SQLite null messages
+ - restructure setup.py, version, readme, etc.
 
 0.2.8 released 2014-07-08
 -------------------------

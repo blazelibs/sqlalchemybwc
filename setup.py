@@ -1,61 +1,40 @@
-"""
-Introduction
----------------
-
-SQLAlchemyBWC is a component for `BlazeWeb <http://pypi.python.org/pypi/BlazeWeb/>`_
-applications.
-
-Questions & Comments
----------------------
-
-Please visit: http://groups.google.com/group/blazelibs
-
-Current Status
----------------
-
-The code stays pretty stable, but the API may change in the future.
-
-The `SQLAlchemyBWC tip <http://bitbucket.org/blazelibs/sqlalchemybwc/get/tip.zip#egg=sqlalchemybwc-dev>`_
-is installable via `easy_install` with ``easy_install SQLAlchemyBWC==dev``
-"""
-
+import os
 from setuptools import setup, find_packages
-from setuptools.command.develop import develop as STDevelopCmd
 
+# pip install -e .[develop]
+develop_requires = [
+    'WebTest',
+]
 
-class DevelopCmd(STDevelopCmd):
-    def run(self):
-        # add in requirements for testing only when using the develop command
-        self.distribution.install_requires.extend([
-            'WebTest',
-        ])
-        STDevelopCmd.run(self)
-
-# has to be here b/c importing from the package gives us an import error if
-# the venv isn't active
-version = '0.2.9'
+cdir = os.path.abspath(os.path.dirname(__file__))
+README = open(os.path.join(cdir, 'readme.rst')).read()
+CHANGELOG = open(os.path.join(cdir, 'changelog.rst')).read()
+VERSION = open(os.path.join(cdir, 'sqlalchemybwc', 'version.txt')).read().strip()
 
 setup(
     name='SQLAlchemyBWC',
-    version=version,
+    version=VERSION,
     description="An SQLAlchemy component for the BlazeWeb applications",
-    long_description=__doc__,
+    long_description='\n\n'.join((README, CHANGELOG)),
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
+        'Programming Language :: Python :: 2.7',
         'License :: OSI Approved :: BSD License',
     ],
     author='Randy Syring',
-    author_email='rsyring@gmail.com',
+    author_email='randy.syring@level12.io',
     url='http://bitbucket.org/blazelibs/sqlalchemybwc/',
     license='BSD',
     packages=find_packages(exclude=['ez_setup']),
     zip_safe=False,
-    cmdclass={'develop': DevelopCmd},
+    include_package_data=True,
     install_requires=[
         'pathlib',
-        'BlazeWeb>=0.3.0',
+        # need session cleanup event support from BlazeWeb
+        'BlazeWeb>=0.4.9',
         'SAValidation >=0.2.0',
         'SQLiteFKTG4SA>=0.1.1',
     ],
+    extras_require={'develop': develop_requires},
 )

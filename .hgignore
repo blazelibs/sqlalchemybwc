@@ -12,3 +12,4 @@ glob:sqlalchemybwc_ta/config/site_settings.py
 glob:*.komodoproject
 syntax: glob
 nosetests.xml
+sqlalchemybwc_ta/test_beaker.db
