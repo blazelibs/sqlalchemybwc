@@ -14,7 +14,7 @@ VERSION = open(os.path.join(cdir, 'sqlalchemybwc', 'version.txt')).read().strip(
 setup(
     name='SQLAlchemyBWC',
     version=VERSION,
-    description="An SQLAlchemy component for the BlazeWeb applications",
+    description="An SQLAlchemy component for BlazeWeb applications",
     long_description='\n\n'.join((README, CHANGELOG)),
     classifiers=[
         'Development Status :: 4 - Beta',
