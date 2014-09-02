@@ -167,7 +167,8 @@ def test_is_unique_msg():
 def test_is_null_msg():
     totest = {
         'sqlite': [
-            "(IntegrityError) permissions.name may not be NULL u'INSERT INTO permissions..."
+            "(IntegrityError) permissions.name may not be NULL u'INSERT INTO permissions...",
+            "(IntegrityError) NOT NULL constraint failed: permissions.name u'INSERT INTO permissions..."
         ],
         'postgresql':[
             '(IntegrityError) null value in column "name" violates not-null constraint...'

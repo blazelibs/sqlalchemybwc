@@ -1,3 +1,4 @@
+import re
 from blazeutils import tolist
 from savalidation import ValidationError
 from sqlalchemy.exc import IntegrityError
@@ -28,7 +29,7 @@ def _is_unique_msg(dialect, msg):
         if 'Cannot insert duplicate key' in msg:
             return True
     elif dialect == 'sqlite':
-        if 'is not unique' in msg or 'are not unique' in msg:
+        if 'is not unique' in msg or 'are not unique' in msg or 'UNIQUE constraint failed' in msg:
             return True
     else:
         raise ValueError('is_unique_exc() does not yet support dialect: %s' % dialect)
@@ -114,6 +115,7 @@ def is_null_exc(exc, field_name):
         return False
     return _is_null_msg(db.engine.dialect.name, str(exc), field_name)
 
+
 def _is_null_msg(dialect, msg, field_name):
     """
         easier unit testing this way
@@ -122,7 +124,10 @@ def _is_null_msg(dialect, msg, field_name):
         if 'Cannot insert the value NULL into column \'%s\'' % field_name in msg:
             return True
     elif dialect == 'sqlite':
-        if '.%s may not be NULL' % field_name in msg:
+        # Newer versions of SQLITE change the message. We have to use a regex to ignore the
+        # table name.
+        match = re.search(r'NOT NULL constraint failed: \S+\.{}'.format(field_name), msg)
+        if '.%s may not be NULL' % field_name in msg or match:
             return True
     elif dialect == 'postgresql':
         if 'null value in column "%s" violates not-null constraint' % field_name in msg:
