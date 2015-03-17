@@ -11,7 +11,7 @@ def sa_dialect_is(*testfor):
             return True
     return False
 
-def is_unique_exc(exc):
+def is_unique_exc(exc, db=db):
     if isinstance(exc, ValidationError):
         return len(exc.invalid_instances) == 1 and _is_unique_error_saval(exc.invalid_instances[0].validation_errors)
     if not isinstance(exc, IntegrityError):
@@ -44,7 +44,7 @@ def _is_unique_error_saval(validation_errors):
                 return False
     return True
 
-def is_fk_exc(exc, key_cname, ref_cname):
+def is_fk_exc(exc, key_cname, ref_cname, db=db):
     """
         Use in testing to identify a FK constraint failure.
 
@@ -106,7 +106,7 @@ def _is_fk_msg(dialect, msg, key_cname, ref_cname):
         raise ValueError('is_fk_exc() does not yet support dialect: %s' % dialect)
     return False
 
-def is_null_exc(exc, field_name):
+def is_null_exc(exc, field_name, db=db):
     if isinstance(exc, ValidationError):
         if len(exc.invalid_instances) != 1:
             return False
@@ -147,7 +147,7 @@ def _is_null_error_saval(validation_errors, field_name):
                 return False
     return True
 
-def is_check_const_exc(exc, constraint_name):
+def is_check_const_exc(exc, constraint_name, db=db):
     if not isinstance(exc, IntegrityError):
         return False
     return _is_check_const(db.engine.dialect.name, str(exc), constraint_name)
