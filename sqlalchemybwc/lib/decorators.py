@@ -12,7 +12,9 @@ from decorator import decorator
 from sqlalchemy.orm.exc import NoResultFound
 
 from compstack.sqlalchemy import db
-from compstack.sqlalchemy.lib.helpers import is_unique_exc, is_null_exc, is_fk_exc
+from compstack.sqlalchemy.lib.helpers import is_unique_exc, is_null_exc, is_fk_exc, \
+    is_check_const_exc
+
 
 def _find_sa_sess(args):
     """
@@ -28,6 +30,7 @@ def _find_sa_sess(args):
     if args and inspect.isclass(args[0]) and hasattr(args[0], '_sa_sess'):
         return args[0]._sa_sess()
     return db.sess
+
 
 @decorator
 def transaction_ncm(f, *args, **kwargs):
@@ -48,11 +51,13 @@ def transaction_ncm(f, *args, **kwargs):
         dbsess.rollback()
         raise
 
+
 def transaction(f):
     """
         like transaction_ncm() but makes the function a class method
     """
     return classmethod(transaction_ncm(f))
+
 
 @decorator
 def ignore_unique_ncm(f, *args, **kwargs):
@@ -71,11 +76,13 @@ def ignore_unique_ncm(f, *args, **kwargs):
                 return
         raise
 
+
 def ignore_unique(f):
     """
         like ignore_unique_ncm() but makes the decorated function a class method
     """
     return classmethod(ignore_unique_ncm(f))
+
 
 @decorator
 def one_to_none_ncm(f, *args, **kwargs):
@@ -91,13 +98,15 @@ def one_to_none_ncm(f, *args, **kwargs):
             raise
         return None
 
+
 def one_to_none(f):
     """
         like one_to_none_ncm() but makes the decorated function a class method
     """
     return classmethod(one_to_none_ncm(f))
 
-def assert_raises_null_or_fk_exc(column_name, ref_column_name):
+
+def assert_raises_null_or_fk_exc(column_name, ref_column_name, db=db):
     """
         Supresses null or fk exceptions, raises assertion error if no exception
         raised.
@@ -108,19 +117,22 @@ def assert_raises_null_or_fk_exc(column_name, ref_column_name):
     def decorator(f):
         @wraps(f)
         def inner(*args, **kwargs):
-            dbsess = _find_sa_sess(args)
             try:
                 f(*args, **kwargs)
                 assert False, 'expected null or FK exception to be raised'
             except Exception, e:
-                dbsess.rollback()
-                if is_null_exc(e, column_name) or is_fk_exc(e, column_name, ref_column_name):
+                db.sess.rollback()
+                if (
+                    is_null_exc(e, column_name, db=db)
+                    or is_fk_exc(e, column_name, ref_column_name, db=db)
+                ):
                     return
                 raise
         return inner
     return decorator
 
-def assert_raises_null_exc(column_name):
+
+def assert_raises_null_exc(column_name, db=db):
     """
         Supresses null exceptions, raises assertion error if no exception
         raised.
@@ -128,19 +140,19 @@ def assert_raises_null_exc(column_name):
     def decorator(f):
         @wraps(f)
         def inner(*args, **kwargs):
-            dbsess = _find_sa_sess(args)
             try:
                 f(*args, **kwargs)
                 assert False, 'expected null exception to be raised'
             except Exception, e:
-                dbsess.rollback()
-                if is_null_exc(e, column_name):
+                db.sess.rollback()
+                if is_null_exc(e, column_name, db=db):
                     return
                 raise
         return inner
     return decorator
 
-def assert_raises_fk_exc(column_name, ref_column_name):
+
+def assert_raises_fk_exc(column_name, ref_column_name, db=db):
     """
         Supresses fk exceptions, raises assertion error if no exception
         raised.
@@ -148,13 +160,52 @@ def assert_raises_fk_exc(column_name, ref_column_name):
     def decorator(f):
         @wraps(f)
         def inner(*args, **kwargs):
-            dbsess = _find_sa_sess(args)
             try:
                 f(*args, **kwargs)
                 assert False, 'expected FK exception to be raised'
             except Exception, e:
-                dbsess.rollback()
-                if is_fk_exc(e, column_name, ref_column_name):
+                db.sess.rollback()
+                if is_fk_exc(e, column_name, ref_column_name, db=db):
+                    return
+                raise
+        return inner
+    return decorator
+
+
+def assert_raises_unique_exc(db=db, **kwargs):
+    """
+        Supresses unique exceptions, raises assertion error if no exception
+        raised.
+    """
+    def decorator(f):
+        @wraps(f)
+        def inner(*args, **kwargs):
+            try:
+                f(*args, **kwargs)
+                assert False, 'expected unique exception to be raised'
+            except Exception, e:
+                db.sess.rollback()
+                if is_unique_exc(e, db=db):
+                    return
+                raise
+        return inner
+    return decorator
+
+
+def assert_raises_check_exc(constraint_name, db=db):
+    """
+        Suppresses check constraint failure exceptions, raises assertion error if no exception
+         raised.
+    """
+    def decorator(f):
+        @wraps(f)
+        def inner(*args, **kwargs):
+            try:
+                f(*args, **kwargs)
+                assert False, 'expected check constraint failure to be raised'
+            except Exception, e:
+                db.sess.rollback()
+                if is_check_const_exc(e, constraint_name, db=db):
                     return
                 raise
         return inner

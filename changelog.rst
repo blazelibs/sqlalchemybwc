@@ -1,10 +1,16 @@
 Change Log
 ===========
 
-0.2.10 released <in dev>
--------------------------
+0.2.11 released 2015-03-17
+--------------------------
 
- - ???
+ - fixed bad MANIFEST.in from 0.2.10
+
+0.2.10 released 2015-03-17
+--------------------------
+
+ - allow testing-related decorators/helpers to specify db for proper rollbacks
+   and dialect message checks
 
 0.2.9 released 2014-08-29
 -------------------------

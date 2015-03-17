@@ -26,7 +26,7 @@ setup(
     author_email='randy.syring@level12.io',
     url='http://bitbucket.org/blazelibs/sqlalchemybwc/',
     license='BSD',
-    packages=find_packages(exclude=['ez_setup']),
+    packages=['sqlalchemybwc'],
     zip_safe=False,
     include_package_data=True,
     install_requires=[
