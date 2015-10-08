@@ -15,3 +15,7 @@ class SmallIntBool(sqlalchemy.types.TypeDecorator):
         if value is None:
             return None
         return bool(value)
+
+    @property
+    def python_type(self):
+        return bool
