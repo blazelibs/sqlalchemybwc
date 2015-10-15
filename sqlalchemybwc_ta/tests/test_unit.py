@@ -210,6 +210,9 @@ def test_is_fk_msg():
             (True, """update or delete on table "blogs" violates foreign key constraint "comments_blog_ident_fkey" on table "comments DETAIL:  Key (ident)=(hWYr3uG4ZAXU) is still referenced from table "comments"."""),
             # some other field than the one we are expecting
             (False, """insert or update on table "comments" violates foreign key constraint "comments_user_id_fkey" DETAIL:  Key (user_id)=(10000) is not present in table "users"."""),
+            # include test for newer versions of SA and/or psycopg2 which result in the full
+            # dotted path of the exception at the beginning of the string
+            (True, '(psycopg2.IntegrityError) insert or update on table "comments" violates foreign key constraint "comments_blog_ident_fkey". DETAIL:  Key (blog_ident)=(10000) is not present in table "blogs".')
         ],
         'mssql': [
             # preventing insert

@@ -84,6 +84,9 @@ def _is_fk_msg(dialect, msg, key_cname, ref_cname):
         if 'violates foreign key constraint' in msg and '__%s__fk' % key_cname in msg:
             return True
     elif dialect == 'postgresql':
+        # newer versions of SA &/or psycopg2 put more detail in so the string replacement in
+        # is_fk_exc() isn't good enough.
+        msg = msg.replace('(psycopg2.IntegrityError) ', '', 1)
         # postgresql does not have the field name in the message when the
         # record referenced by a FK is deleted, so don't check for field_name
         # here
