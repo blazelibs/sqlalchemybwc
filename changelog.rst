@@ -1,10 +1,11 @@
 Change Log
 ===========
 
-0.2.12 released <in dev>
+0.2.12 released 2015-10-05
 --------------------------
 
- - ???
+ - add python_type property to SmallIntBool type
+ - fix FK message detection on PostgreSQL with newer library versions.
 
 0.2.11 released 2015-03-17
 --------------------------
