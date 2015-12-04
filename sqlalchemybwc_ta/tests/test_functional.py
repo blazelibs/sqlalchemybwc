@@ -83,7 +83,7 @@ class TestTemplates(object):
             
         eq_(
             db.sess.execute(
-                sa.sql.select([sa.sql.func.count('*')], from_obj='beaker_cache')
+                sa.sql.select([sa.sql.func.count('*')], from_obj=sa.sql.text('beaker_cache'))
             ).fetchone(),
             (10, )
         )
@@ -93,7 +93,7 @@ class TestTemplates(object):
 
         eq_(
             db.sess.execute(
-                sa.sql.select([sa.sql.func.count('*')], from_obj='beaker_cache')
+                sa.sql.select([sa.sql.func.count('*')], from_obj=sa.sql.text('beaker_cache'))
             ).fetchone(),
             (6, )
         )

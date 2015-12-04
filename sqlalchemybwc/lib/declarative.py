@@ -9,7 +9,6 @@ import sqlalchemy.ext.declarative as sadec
 from sqlalchemy.inspection import inspect as sa_inspect
 import sqlalchemy.orm as saorm
 import sqlalchemy.sql as sasql
-from sqlalchemy.util import classproperty
 
 from compstack.sqlalchemy import db
 from compstack.sqlalchemy.lib.columns import SmallIntBool
@@ -284,7 +283,7 @@ def declarative_base(*args, **kwargs):
 ### Lookup Functionality
 ###
 class LookupMixin(DefaultMixin):
-    @classproperty
+    @sadec.declared_attr
     def label(cls):
         return sa.Column(sa.Unicode(255), nullable=False, unique=True)
     active_flag = sa.Column(SmallIntBool, nullable=False, server_default=sasql.text('1'))
