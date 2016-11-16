@@ -5,18 +5,22 @@ from sqlalchemy.exc import IntegrityError
 
 from compstack.sqlalchemy import db
 
+
 def sa_dialect_is(*testfor):
     for d in testfor:
         if db.engine.dialect.name == d:
             return True
     return False
 
+
 def is_unique_exc(exc, db=db):
     if isinstance(exc, ValidationError):
-        return len(exc.invalid_instances) == 1 and _is_unique_error_saval(exc.invalid_instances[0].validation_errors)
+        return len(exc.invalid_instances) == 1 and \
+            _is_unique_error_saval(exc.invalid_instances[0].validation_errors)
     if not isinstance(exc, IntegrityError):
         return False
     return _is_unique_msg(db.engine.dialect.name, str(exc))
+
 
 def _is_unique_msg(dialect, msg):
     """
@@ -35,6 +39,7 @@ def _is_unique_msg(dialect, msg):
         raise ValueError('is_unique_exc() does not yet support dialect: %s' % dialect)
     return False
 
+
 def _is_unique_error_saval(validation_errors):
     if not len(validation_errors):
         return False
@@ -43,6 +48,7 @@ def _is_unique_error_saval(validation_errors):
             if 'unique' not in err:
                 return False
     return True
+
 
 def is_fk_exc(exc, key_cname, ref_cname, db=db):
     """
@@ -72,6 +78,7 @@ def is_fk_exc(exc, key_cname, ref_cname, db=db):
         return False
     msg = str(exc).replace('(IntegrityError) ', '', 1)
     return _is_fk_msg(db.engine.dialect.name, msg, key_cname, ref_cname)
+
 
 def _is_fk_msg(dialect, msg, key_cname, ref_cname):
     """
@@ -109,6 +116,7 @@ def _is_fk_msg(dialect, msg, key_cname, ref_cname):
         raise ValueError('is_fk_exc() does not yet support dialect: %s' % dialect)
     return False
 
+
 def is_null_exc(exc, field_name, db=db):
     if isinstance(exc, ValidationError):
         if len(exc.invalid_instances) != 1:
@@ -139,6 +147,7 @@ def _is_null_msg(dialect, msg, field_name):
         raise ValueError('is_null_exc() does not yet support dialect: %s' % dialect)
     return False
 
+
 def _is_null_error_saval(validation_errors, field_name):
     if not len(validation_errors):
         return False
@@ -150,10 +159,12 @@ def _is_null_error_saval(validation_errors, field_name):
                 return False
     return True
 
+
 def is_check_const_exc(exc, constraint_name, db=db):
     if not isinstance(exc, IntegrityError):
         return False
     return _is_check_const(db.engine.dialect.name, str(exc), constraint_name)
+
 
 def _is_check_const(dialect, msg, constraint_name):
     if dialect == 'mssql':
@@ -168,6 +179,7 @@ def _is_check_const(dialect, msg, constraint_name):
     else:
         raise ValueError('is_constraint_exc() does not yet support dialect: %s' % dialect)
     return False
+
 
 def clear_db():
     if db.engine.dialect.name == 'postgresql':
@@ -198,7 +210,7 @@ def clear_db():
             try:
                 table.drop(db.engine)
             except Exception, e:
-                if not 'no such table' in str(e):
+                if 'no such table' not in str(e):
                     raise
     elif db.engine.dialect.name == 'mssql':
         mapping = {
@@ -222,6 +234,7 @@ def clear_db():
         return False
     return True
 
+
 def clear_db_data():
     dialect_name = db.engine.dialect.name
     if dialect_name == 'postgresql':
@@ -241,7 +254,7 @@ def clear_db_data():
                 raise
                 print 'WARNING: %s' % e
     elif dialect_name == 'sqlite':
-       raise Exception('clear_db_data() does not yet support sqlite')
+        raise Exception('clear_db_data() does not yet support sqlite')
     elif dialect_name == 'mssql':
         raise Exception('clear_db_data() does not yet support mssql')
     else:

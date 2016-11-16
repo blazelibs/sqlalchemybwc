@@ -6,6 +6,7 @@ from compstack.sqlalchemy.lib.helpers import is_fk_exc, is_null_exc
 from sqlalchemybwc_ta.model.entities import Blog, Comment
 from sqlalchemybwc_ta.model.schema import colors
 
+
 class TestBlog(object):
 
     def setUp(self):
@@ -18,6 +19,7 @@ class TestBlog(object):
         assert b.id > 0
         assert b.createdts
 
+
 class TestColors(object):
 
     def test_add(self):
@@ -25,6 +27,7 @@ class TestColors(object):
         model/schema.py.  If it wasn't, then the below would throw an exception. """
         result = db.engine.execute(colors.select())
         assert result
+
 
 class TestIntegrity(object):
 

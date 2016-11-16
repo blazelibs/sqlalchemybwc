@@ -1,5 +1,6 @@
 from blazeweb.config import ComponentSettings
 
+
 class Settings(ComponentSettings):
     def init(self):
         self.for_me.pre_test_init_tasks = 'clear-db', 'init-db:~test'

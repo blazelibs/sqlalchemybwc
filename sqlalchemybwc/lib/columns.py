@@ -1,5 +1,6 @@
 import sqlalchemy.types
 
+
 class SmallIntBool(sqlalchemy.types.TypeDecorator):
     # A SmallInteger type that always saves as 0 or 1 on the DB side and has
     # a True/False value on the Python side

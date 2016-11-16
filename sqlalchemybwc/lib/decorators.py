@@ -123,8 +123,8 @@ def assert_raises_null_or_fk_exc(column_name, ref_column_name, db=db):
             except Exception, e:
                 db.sess.rollback()
                 if (
-                    is_null_exc(e, column_name, db=db)
-                    or is_fk_exc(e, column_name, ref_column_name, db=db)
+                    is_null_exc(e, column_name, db=db) or
+                    is_fk_exc(e, column_name, ref_column_name, db=db)
                 ):
                     return
                 raise

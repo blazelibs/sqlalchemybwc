@@ -12,6 +12,7 @@ from sqlalchemybwc import db
 from sqlalchemybwc_ta.application import make_wsgi
 from sqlalchemybwc_ta.model.orm import Car
 
+
 class TestTemplates(object):
 
     @classmethod
@@ -76,11 +77,11 @@ class TestTemplates(object):
                 created=dt.datetime.now(),
                 accessed=(
                     dt.datetime.now() -
-                    dt.timedelta(seconds=60*5*i)
+                    dt.timedelta(seconds=60 * 5 * i)
                 ),
                 data='55'
             ).execute()
-            
+
         eq_(
             db.sess.execute(
                 sa.sql.select([sa.sql.func.count('*')], from_obj=sa.sql.text('beaker_cache'))
@@ -88,7 +89,7 @@ class TestTemplates(object):
             (10, )
         )
 
-        # re-run the app to clear sessions    
+        # re-run the app to clear sessions
         wsgiapp = make_wsgi('BeakerSessionTest')
 
         eq_(
