@@ -26,7 +26,7 @@ setup(
     ],
     author='Randy Syring',
     author_email='randy.syring@level12.io',
-    url='http://bitbucket.org/blazelibs/sqlalchemybwc/',
+    url='https://github.com/blazelibs/sqlalchemybwc/',
     license='BSD',
     packages=['sqlalchemybwc'],
     zip_safe=False,
