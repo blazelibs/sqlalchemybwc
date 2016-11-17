@@ -1,5 +1,7 @@
 from blazeutils.testing import raises
 from nose.tools import eq_
+import six
+
 from sqlalchemybwc import db
 from sqlalchemybwc.lib.decorators import one_to_none_ncm, \
     assert_raises_null_or_fk_exc, assert_raises_null_exc, assert_raises_fk_exc
@@ -27,7 +29,7 @@ def test_ignore_unique():
     try:
         UniqueRecord.add(u'test_ignore_unique')
         assert False
-    except Exception, e:
+    except Exception as e:
         if not is_unique_exc(e):
             raise
 
@@ -46,7 +48,7 @@ def test_ignore_unique_two():
     try:
         UniqueRecordTwo.add(name=u'test_ignore_unique_two', email=u'tiu@example.com')
         assert False
-    except Exception, e:
+    except Exception as e:
         if not is_unique_exc(e):
             raise
 
@@ -61,7 +63,7 @@ def test_ignore_unique_indexes():
     try:
         Truck.add(u'ford', u'windstar')
         assert False
-    except Exception, e:
+    except Exception as e:
         if not is_unique_exc(e):
             raise
 
@@ -97,7 +99,7 @@ def test_one_to_none_ncm():
     try:
         hasmany()
         assert False, 'expected exception'
-    except Exception, e:
+    except Exception as e:
         if 'Multiple rows were found for one()' != str(e):
             raise
 
@@ -177,7 +179,7 @@ def test_is_unique_msg():
     def dotest(dialect, msg):
         assert _is_unique_msg(dialect, msg)
 
-    for k, v in totest.iteritems():
+    for k, v in six.iteritems(totest):
         for msg in v:
             yield dotest, k, msg
 
@@ -203,7 +205,7 @@ def test_is_null_msg():
     def dotest(dialect, msg):
         assert _is_null_msg(dialect, msg, u'name')
 
-    for k, v in totest.iteritems():
+    for k, v in six.iteritems(totest):
         for msg in v:
             yield dotest, k, msg
 
@@ -295,7 +297,7 @@ def test_is_fk_msg():
         retval = _is_fk_msg(dialect, msg, 'blog_ident', 'ident')
         eq_(is_fk_flag, retval)
 
-    for k, v in totest.iteritems():
+    for k, v in six.iteritems(totest):
         for is_fk_flag, msg in v:
             yield test_is_fk, k, msg, is_fk_flag
 
@@ -330,7 +332,7 @@ def test_is_check_constraint_msg():
         retval = _is_check_const(dialect, msg, 'ck_auth_users_uids_not_null')
         eq_(expect, retval)
 
-    for k, v in totest.iteritems():
+    for k, v in six.iteritems(totest):
         for expect, msg in v:
             yield check_func, k, msg, expect
 

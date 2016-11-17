@@ -16,7 +16,7 @@ class TestUniqueValidation(object):
         try:
             HasUniqueValidation.add(name='a', email='c')
             assert False
-        except ValidationError, e:
+        except ValidationError as e:
             expect = {'name': [u'the value for this field is not unique']}
             eq_(e.invalid_instances[0].validation_errors, expect)
         HasUniqueValidation.add(name='b', email='c')
@@ -26,7 +26,7 @@ class TestUniqueValidation(object):
         try:
             HasUniqueValidation.add(name='b', email='b')
             assert False
-        except ValidationError, e:
+        except ValidationError as e:
             expect = {'email': [u'the value for this field is not unique']}
             eq_(e.invalid_instances[0].validation_errors, expect)
         HasUniqueValidation.add(name='b', email='c')
@@ -36,7 +36,7 @@ class TestUniqueValidation(object):
         try:
             HasUniqueValidation.add(name='a', email='b')
             assert False
-        except ValidationError, e:
+        except ValidationError as e:
             expect = {'name': [u'the value for this field is not unique'],
                       'email': [u'the value for this field is not unique']}
             eq_(e.invalid_instances[0].validation_errors, expect)
@@ -57,7 +57,7 @@ class TestUniqueValidation(object):
         try:
             db.sess.commit()
             assert False
-        except ValidationError, e:
+        except ValidationError as e:
             db.sess.rollback()
             expect = {'email': [u'the value for this field is not unique']}
             eq_(e.invalid_instances[0].validation_errors, expect)

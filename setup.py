@@ -20,6 +20,7 @@ setup(
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
         'License :: OSI Approved :: BSD License',
     ],
     author='Randy Syring',
@@ -34,7 +35,7 @@ setup(
         # need session cleanup event support from BlazeWeb
         'BlazeWeb>=0.4.9',
         'SAValidation >=0.2.0',
-        'SQLiteFKTG4SA>=0.1.1',
+        'six',
     ],
     extras_require={'develop': develop_requires},
 )

@@ -4,6 +4,7 @@ from blazeutils.helpers import tolist
 from blazeutils.strings import randchars
 from blazeweb.globals import ag
 import savalidation as saval
+import six
 import sqlalchemy as sa
 import sqlalchemy.ext.declarative as sadec
 from sqlalchemy.inspection import inspect as sa_inspect
@@ -220,7 +221,7 @@ class MethodsMixin(object):
 
         mapper = saorm.object_mapper(self)
 
-        for key, value in data.iteritems():
+        for key, value in six.iteritems(data):
             if isinstance(value, dict):
                 dbvalue = getattr(self, key)
                 rel_class = mapper.get_property(key).mapper.class_

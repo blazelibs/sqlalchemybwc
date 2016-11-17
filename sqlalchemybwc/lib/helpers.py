@@ -1,6 +1,7 @@
 import re
 from blazeutils import tolist
 from savalidation import ValidationError
+import six
 from sqlalchemy.exc import IntegrityError
 
 from compstack.sqlalchemy import db
@@ -192,8 +193,8 @@ def clear_db():
         for exstr in sql:
             try:
                 db.engine.execute(exstr)
-            except Exception, e:
-                print 'WARNING: %s' % e
+            except Exception as e:
+                print('WARNING: %s' % e)
     elif db.engine.dialect.name == 'sqlite':
         # drop the views
         sql = "select name from sqlite_master where type='view'"
@@ -209,7 +210,7 @@ def clear_db():
         for table in reversed(db.meta.sorted_tables):
             try:
                 table.drop(db.engine)
-            except Exception, e:
+            except Exception as e:
                 if 'no such table' not in str(e):
                     raise
     elif db.engine.dialect.name == 'mssql':
@@ -222,7 +223,7 @@ def clear_db():
             'U': 'drop table [%(name)s]',
         }
         delete_sql = []
-        for type, drop_sql in mapping.iteritems():
+        for type, drop_sql in six.iteritems(mapping):
             sql = 'select name, object_name( parent_object_id ) as parent_name '\
                 'from sys.objects where type in (\'%s\')' % "', '".join(type)
             rows = db.engine.execute(sql)
@@ -250,9 +251,8 @@ def clear_db_data():
         for row in db.sess.execute(select_sql):
             try:
                 db.sess.execute(truncate_sql.format(row))
-            except Exception, e:
+            except Exception as e:
                 raise
-                print 'WARNING: %s' % e
     elif dialect_name == 'sqlite':
         raise Exception('clear_db_data() does not yet support sqlite')
     elif dialect_name == 'mssql':

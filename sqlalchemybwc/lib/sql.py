@@ -94,7 +94,7 @@ def _run_dir_sql(rel_path):
 def _run_file_sql(relative_sql_path):
     full_path = findfile(relative_sql_path)
     with open(full_path, 'rb') as fh:
-        sql_file_contents = fh.read()
+        sql_file_contents = fh.read().decode()
     for sql_block in yield_sql_blocks(sql_file_contents):
         _execute_sql_block(sql_block)
 
@@ -122,7 +122,7 @@ def yield_blocks_from_dir(rel_path):
             if not filename.endswith('.sql'):
                 continue
             with open(path.join(dirname, filename), 'rb') as fh:
-                sql_file_contents = fh.read()
+                sql_file_contents = fh.read().decode()
             line1, _ = sql_file_contents.split('\n', 1)
             if 'dialect-require:' not in line1 or db.engine.dialect.name in line1:
                 for sql_block in yield_sql_blocks(sql_file_contents):

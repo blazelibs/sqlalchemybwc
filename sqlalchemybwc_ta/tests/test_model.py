@@ -43,7 +43,7 @@ class TestIntegrity(object):
         try:
             Comment.add(blog_ident=10000)
             assert False, 'expected FK exception'
-        except Exception, e:
+        except Exception as e:
             db.sess.rollback()
             if not is_fk_exc(e, 'blog_ident', 'ident'):
                 raise
@@ -54,7 +54,7 @@ class TestIntegrity(object):
         try:
             db.sess.commit()
             assert False, 'expected FK exception'
-        except Exception, e:
+        except Exception as e:
             db.sess.rollback()
             if not is_fk_exc(e, 'blog_ident', 'ident'):
                 raise
@@ -65,7 +65,7 @@ class TestIntegrity(object):
         try:
             Blog.delete(b.id)
             assert False, 'expected FK exception'
-        except Exception, e:
+        except Exception as e:
             db.sess.rollback()
             if not is_fk_exc(e, 'blog_ident', 'ident'):
                 raise
@@ -81,7 +81,7 @@ class TestIntegrity(object):
         try:
             db.sess.commit()
             assert False, 'expected FK exception'
-        except Exception, e:
+        except Exception as e:
             db.sess.rollback()
             if not is_fk_exc(e, 'blog_ident', 'ident'):
                 raise
@@ -90,7 +90,7 @@ class TestIntegrity(object):
         try:
             Blog.add(title=None)
             assert False, 'expected not null exception'
-        except Exception, e:
+        except Exception as e:
             db.sess.rollback()
             if not is_null_exc(e, 'title'):
                 raise

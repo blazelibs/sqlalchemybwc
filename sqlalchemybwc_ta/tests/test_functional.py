@@ -79,7 +79,7 @@ class TestTemplates(object):
                     dt.datetime.now() -
                     dt.timedelta(seconds=60 * 5 * i)
                 ),
-                data='55'
+                data=b'55'
             ).execute()
 
         eq_(
