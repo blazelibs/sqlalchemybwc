@@ -4,6 +4,7 @@ from sqlalchemybwc import db
 
 from sqlalchemybwc_ta.model.orm import HasUniqueValidation
 
+
 class TestUniqueValidation(object):
 
     def tearDown(cls):
@@ -15,7 +16,7 @@ class TestUniqueValidation(object):
         try:
             HasUniqueValidation.add(name='a', email='c')
             assert False
-        except ValidationError, e:
+        except ValidationError as e:
             expect = {'name': [u'the value for this field is not unique']}
             eq_(e.invalid_instances[0].validation_errors, expect)
         HasUniqueValidation.add(name='b', email='c')
@@ -25,7 +26,7 @@ class TestUniqueValidation(object):
         try:
             HasUniqueValidation.add(name='b', email='b')
             assert False
-        except ValidationError, e:
+        except ValidationError as e:
             expect = {'email': [u'the value for this field is not unique']}
             eq_(e.invalid_instances[0].validation_errors, expect)
         HasUniqueValidation.add(name='b', email='c')
@@ -35,9 +36,9 @@ class TestUniqueValidation(object):
         try:
             HasUniqueValidation.add(name='a', email='b')
             assert False
-        except ValidationError, e:
+        except ValidationError as e:
             expect = {'name': [u'the value for this field is not unique'],
-                'email': [u'the value for this field is not unique']}
+                      'email': [u'the value for this field is not unique']}
             eq_(e.invalid_instances[0].validation_errors, expect)
         HasUniqueValidation.add(name='b', email='c')
 
@@ -50,13 +51,13 @@ class TestUniqueValidation(object):
         assert inst.email == 'c'
 
     def test_validate_unique_edit(self):
-        inst1 = HasUniqueValidation.add(name='a', email='b')
+        HasUniqueValidation.add(name='a', email='b')
         inst2 = HasUniqueValidation.add(name='c', email='d')
         inst2.email = 'b'
         try:
             db.sess.commit()
             assert False
-        except ValidationError, e:
+        except ValidationError as e:
             db.sess.rollback()
             expect = {'email': [u'the value for this field is not unique']}
             eq_(e.invalid_instances[0].validation_errors, expect)

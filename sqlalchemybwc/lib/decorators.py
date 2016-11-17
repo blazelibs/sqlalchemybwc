@@ -70,7 +70,7 @@ def ignore_unique_ncm(f, *args, **kwargs):
     dbsess = _find_sa_sess(args)
     try:
         return f(*args, **kwargs)
-    except Exception, e:
+    except Exception as e:
         dbsess.rollback()
         if is_unique_exc(e):
                 return
@@ -93,7 +93,7 @@ def one_to_none_ncm(f, *args, **kwargs):
     """
     try:
         return f(*args, **kwargs)
-    except NoResultFound, e:
+    except NoResultFound as e:
         if 'No row was found for one()' != str(e):
             raise
         return None
@@ -120,11 +120,11 @@ def assert_raises_null_or_fk_exc(column_name, ref_column_name, db=db):
             try:
                 f(*args, **kwargs)
                 assert False, 'expected null or FK exception to be raised'
-            except Exception, e:
+            except Exception as e:
                 db.sess.rollback()
                 if (
-                    is_null_exc(e, column_name, db=db)
-                    or is_fk_exc(e, column_name, ref_column_name, db=db)
+                    is_null_exc(e, column_name, db=db) or
+                    is_fk_exc(e, column_name, ref_column_name, db=db)
                 ):
                     return
                 raise
@@ -143,7 +143,7 @@ def assert_raises_null_exc(column_name, db=db):
             try:
                 f(*args, **kwargs)
                 assert False, 'expected null exception to be raised'
-            except Exception, e:
+            except Exception as e:
                 db.sess.rollback()
                 if is_null_exc(e, column_name, db=db):
                     return
@@ -163,7 +163,7 @@ def assert_raises_fk_exc(column_name, ref_column_name, db=db):
             try:
                 f(*args, **kwargs)
                 assert False, 'expected FK exception to be raised'
-            except Exception, e:
+            except Exception as e:
                 db.sess.rollback()
                 if is_fk_exc(e, column_name, ref_column_name, db=db):
                     return
@@ -183,7 +183,7 @@ def assert_raises_unique_exc(db=db, **kwargs):
             try:
                 f(*args, **kwargs)
                 assert False, 'expected unique exception to be raised'
-            except Exception, e:
+            except Exception as e:
                 db.sess.rollback()
                 if is_unique_exc(e, db=db):
                     return
@@ -203,7 +203,7 @@ def assert_raises_check_exc(constraint_name, db=db):
             try:
                 f(*args, **kwargs)
                 assert False, 'expected check constraint failure to be raised'
-            except Exception, e:
+            except Exception as e:
                 db.sess.rollback()
                 if is_check_const_exc(e, constraint_name, db=db):
                     return

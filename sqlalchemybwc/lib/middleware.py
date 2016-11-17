@@ -19,24 +19,24 @@ class DebugSession(Session):
 
     def execute(self, clause, params=None, mapper=None, **kw):
         try:
-            print 'E>>> ' + self.dbg_label
+            print('E>>> ' + self.dbg_label)
             return Session.execute(self, clause, params, mapper, **kw)
         finally:
-            print '<<<E'
+            print('<<<E')
 
     def _flush(self, objects=None):
         try:
-            print '>>>F ' + self.dbg_label
+            print('>>>F ' + self.dbg_label)
             return Session._flush(self, objects)
         finally:
-            print '<<<F'
+            print('<<<F')
 
     def commit(self):
         try:
-            print '>>>C ' + self.dbg_label
+            print('>>>C ' + self.dbg_label)
             return Session.commit(self)
         finally:
-            print '<<<C'
+            print('<<<C')
 
 
 class SQLAlchemyContainer(object):

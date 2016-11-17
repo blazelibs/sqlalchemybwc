@@ -6,6 +6,7 @@ from compstack.sqlalchemy.lib.declarative import declarative_base, DefaultMixin
 
 Base = declarative_base()
 
+
 class Blog(Base, DefaultMixin):
     __tablename__ = 'blogs'
 
@@ -14,6 +15,7 @@ class Blog(Base, DefaultMixin):
     # running into problems on the db side by trying to update an identity
     # or PK column
     ident = sa.Column(sa.String(12), unique=True, nullable=False, default=lambda: randchars())
+
 
 class Comment(Base, DefaultMixin):
     __tablename__ = 'comments'

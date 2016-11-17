@@ -1,0 +1,21 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    # Need to override the dependencies or circle will do something bad, ask Nick what that is,
+    # he couldn't remember.  :)
+    - pwd
+
+test:
+  override:
+    - ls -la
+    - /home/ubuntu/$CIRCLE_PROJECT_REPONAME/docker-run-tests
+
+deployment:
+  codecov:
+    branch: /.*/
+    commands:
+      - bash <(curl -s https://codecov.io/bash) -t "61817145-1d34-489d-af7b-8c2de2b5fc90"
+

@@ -20,11 +20,13 @@ setup(
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'License :: OSI Approved :: BSD License',
     ],
     author='Randy Syring',
     author_email='randy.syring@level12.io',
-    url='http://bitbucket.org/blazelibs/sqlalchemybwc/',
+    url='https://github.com/blazelibs/sqlalchemybwc/',
     license='BSD',
     packages=['sqlalchemybwc'],
     zip_safe=False,
@@ -34,7 +36,7 @@ setup(
         # need session cleanup event support from BlazeWeb
         'BlazeWeb>=0.4.9',
         'SAValidation >=0.2.0',
-        'SQLiteFKTG4SA>=0.1.1',
+        'six',
     ],
     extras_require={'develop': develop_requires},
 )

@@ -4,6 +4,7 @@ from blazeutils.helpers import tolist
 from blazeutils.strings import randchars
 from blazeweb.globals import ag
 import savalidation as saval
+import six
 import sqlalchemy as sa
 import sqlalchemy.ext.declarative as sadec
 from sqlalchemy.inspection import inspect as sa_inspect
@@ -15,10 +16,13 @@ from compstack.sqlalchemy.lib.columns import SmallIntBool
 from compstack.sqlalchemy.lib.decorators import one_to_none, transaction, \
     ignore_unique
 
+
 class DefaultColsMixin(object):
     id = sa.Column(sa.Integer, primary_key=True)
-    createdts = sa.Column(sa.DateTime, nullable=False, default=datetime.now, server_default=sasql.text('CURRENT_TIMESTAMP'))
+    createdts = sa.Column(sa.DateTime, nullable=False, default=datetime.now,
+                          server_default=sasql.text('CURRENT_TIMESTAMP'))
     updatedts = sa.Column(sa.DateTime, onupdate=datetime.now)
+
 
 class MethodsMixin(object):
     # the object that the SA session should be pulled from
@@ -37,7 +41,6 @@ class MethodsMixin(object):
         else:
             entities = [cls]
         return cls._sa_sess().query(*entities)
-
 
     @transaction
     def add(cls, **kwargs):
@@ -113,7 +116,9 @@ class MethodsMixin(object):
         if kwargs:
             raise ValueError('order_by is the only acceptable keyword arg')
         where_clause = cls.combine_clauses(clause, extra_clauses)
-        return cls.order_by_helper(cls._sa_sess().query(cls), order_by).filter(where_clause).first()
+        return cls.order_by_helper(
+            cls._sa_sess().query(cls), order_by
+        ).filter(where_clause).first()
 
     @classmethod
     def list(cls, order_by=None):
@@ -153,9 +158,9 @@ class MethodsMixin(object):
         retval = []
         for obj in _result:
             retval.append((
-                  getattr(obj, key_field_name),
-                  getattr(obj, value_field_name)
-                ))
+                getattr(obj, key_field_name),
+                getattr(obj, value_field_name)
+            ))
         return retval
 
     @classmethod
@@ -216,7 +221,7 @@ class MethodsMixin(object):
 
         mapper = saorm.object_mapper(self)
 
-        for key, value in data.iteritems():
+        for key, value in six.iteritems(data):
             if isinstance(value, dict):
                 dbvalue = getattr(self, key)
                 rel_class = mapper.get_property(key).mapper.class_
@@ -225,21 +230,21 @@ class MethodsMixin(object):
                 # If the data doesn't contain any pk, and the relationship
                 # already has a value, update that record.
                 if not [1 for p in pk_props if p.key in data] and \
-                   dbvalue is not None:
+                        dbvalue is not None:
                     dbvalue.from_dict(value)
                 else:
                     record = rel_class.update_or_create(value)
                     setattr(self, key, record)
             elif isinstance(value, list) and \
-                 value and isinstance(value[0], dict):
+                    value and isinstance(value[0], dict):
 
                 rel_class = mapper.get_property(key).mapper.class_
                 new_attr_value = []
                 for row in value:
                     if not isinstance(row, dict):
                         raise Exception(
-                                'Cannot send mixed (dict/non dict) data '
-                                'to list relationships in from_dict data.')
+                            'Cannot send mixed (dict/non dict) data '
+                            'to list relationships in from_dict data.')
                     record = rel_class.update_or_create(row)
                     new_attr_value.append(record)
                 setattr(self, key, new_attr_value)
@@ -261,11 +266,13 @@ class MethodsMixin(object):
 
     @classmethod
     def sa_column_names(self):
-        return [p.key for p in self.__mapper__.iterate_properties \
-                                      if isinstance(p, saorm.ColumnProperty)]
+        return [p.key for p in self.__mapper__.iterate_properties
+                if isinstance(p, saorm.ColumnProperty)]
+
 
 class DefaultMixin(saval.ValidationMixin, DefaultColsMixin, MethodsMixin):
     pass
+
 
 def declarative_base(*args, **kwargs):
     """
@@ -279,8 +286,9 @@ def declarative_base(*args, **kwargs):
         setattr(ag, ag_attr_name, sadec.declarative_base(*args, **kwargs))
     return getattr(ag, ag_attr_name)
 
+
 ###
-### Lookup Functionality
+#   Lookup Functionality
 ###
 class LookupMixin(DefaultMixin):
     @sadec.declared_attr

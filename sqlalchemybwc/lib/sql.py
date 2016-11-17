@@ -6,8 +6,10 @@ from blazeweb.hierarchy import findfile, FileNotFound
 from compstack.sqlalchemy import db
 from pathlib import Path
 
+
 class NotDirectoryExc(Exception):
     pass
+
 
 def run_component_sql(component, target, use_dialect=False):
     ''' see docs for run_app_sql(): usage is the same, execpt for the `component`
@@ -25,7 +27,8 @@ def run_component_sql(component, target, use_dialect=False):
         relative_sql_path = 'sql/%s.%s.sql' % (target, db.engine.dialect.name)
     else:
         relative_sql_path = 'sql/%s.sql' % (target)
-    _run_file_sql('%s:%s'%(component,relative_sql_path))
+    _run_file_sql('%s:%s' % (component, relative_sql_path))
+
 
 def run_app_sql(target, use_dialect=False):
     ''' used to run SQL from files in an apps "sql" directory:
@@ -76,22 +79,25 @@ def run_app_sql(target, use_dialect=False):
         pass
 
     if use_dialect:
-        relative_sql_path = 'sql/%s.%s.sql' % (target, db.engine.dialect.name )
+        relative_sql_path = 'sql/%s.%s.sql' % (target, db.engine.dialect.name)
     else:
         relative_sql_path = 'sql/%s.sql' % target
 
     _run_file_sql(relative_sql_path)
 
+
 def _run_dir_sql(rel_path):
     for filename, sql_block in yield_blocks_from_dir(rel_path):
         _execute_sql_block(sql_block)
 
+
 def _run_file_sql(relative_sql_path):
     full_path = findfile(relative_sql_path)
     with open(full_path, 'rb') as fh:
-        sql_file_contents = fh.read()
+        sql_file_contents = fh.read().decode()
     for sql_block in yield_sql_blocks(sql_file_contents):
         _execute_sql_block(sql_block)
+
 
 def _execute_sql_block(sql):
     try:
@@ -99,6 +105,7 @@ def _execute_sql_block(sql):
     except Exception:
         db.sess.rollback()
         raise
+
 
 def yield_blocks_from_dir(rel_path):
     """
@@ -115,11 +122,12 @@ def yield_blocks_from_dir(rel_path):
             if not filename.endswith('.sql'):
                 continue
             with open(path.join(dirname, filename), 'rb') as fh:
-                sql_file_contents = fh.read()
+                sql_file_contents = fh.read().decode()
             line1, _ = sql_file_contents.split('\n', 1)
             if 'dialect-require:' not in line1 or db.engine.dialect.name in line1:
                 for sql_block in yield_sql_blocks(sql_file_contents):
                     yield filename, sql_block
+
 
 def yield_sql_blocks(file_contents):
     for sql_block in file_contents.split('--statement-break'):

@@ -1,0 +1,10 @@
+-r common.txt
+
+psycopg2
+pymssql
+
+coverage
+flake8
+pyquery
+tox
+webtest
