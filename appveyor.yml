@@ -1,0 +1,112 @@
+environment:
+  global:
+    # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
+    # /E:ON and /V:ON options are not enabled in the batch script intepreter
+    # See: http://stackoverflow.com/a/13751649/163740
+    CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\appveyor\\run_with_env.cmd"
+
+  matrix:
+    # Pre-installed Python versions, which Appveyor may upgrade to
+    # a later point release.
+    - PYTHON: "C:\\Python27"
+      PYTHON_VERSION: "2.7.12"
+      PYTHON_ARCH: "32"
+      TOXENV: py27
+      DB_TYPE: "sqlite"
+
+    - PYTHON: "C:\\Python34"
+      PYTHON_VERSION: "3.4.5"
+      PYTHON_ARCH: "32"
+      TOXENV: py34
+      DB_TYPE: "sqlite"
+
+    - PYTHON: "C:\\Python35"
+      PYTHON_VERSION: "3.5.2"
+      PYTHON_ARCH: "32"
+      TOXENV: py35
+      DB_TYPE: "sqlite"
+
+    - PYTHON: "C:\\Python27"
+      PYTHON_VERSION: "2.7.12"
+      PYTHON_ARCH: "32"
+      TOXENV: py27
+      DB_TYPE: "postgres"
+
+    - PYTHON: "C:\\Python34"
+      PYTHON_VERSION: "3.4.5"
+      PYTHON_ARCH: "32"
+      TOXENV: py34
+      DB_TYPE: "postgres"
+
+    - PYTHON: "C:\\Python35"
+      PYTHON_VERSION: "3.5.2"
+      PYTHON_ARCH: "32"
+      TOXENV: py35
+      DB_TYPE: "postgres"
+
+    - PYTHON: "C:\\Python27"
+      PYTHON_VERSION: "2.7.12"
+      PYTHON_ARCH: "32"
+      TOXENV: py27
+      DB_TYPE: "mssql"
+
+    - PYTHON: "C:\\Python34"
+      PYTHON_VERSION: "3.4.5"
+      PYTHON_ARCH: "32"
+      TOXENV: py34
+      DB_TYPE: "mssql"
+
+    - PYTHON: "C:\\Python35"
+      PYTHON_VERSION: "3.5.2"
+      PYTHON_ARCH: "32"
+      TOXENV: py35
+      DB_TYPE: "mssql"
+
+  INSTANCENAME: "SQL2008R2SP2"
+  PGUSER: postgres
+  PGPASSWORD: Password12!
+
+services:
+  - postgresql
+  - mssql2008r2sp2
+
+install:
+  # add postgres to path
+  - "SET PATH=C:\\Program Files\\PostgreSQL\\9.4\\bin;%PATH%"
+
+  # Prepend newly installed Python to the PATH of this build (this cannot be
+  # done from inside the powershell script as it would require to restart
+  # the parent CMD process).
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  
+  # Check that we have the expected version and architecture for Python
+  - python --version
+  - python -c "import struct; print(struct.calcsize('P') * 8)"
+  - pip --version
+
+  # Install tox from the wheelhouse
+  - pip install --use-wheel --no-index --find-links=requirements/wheelhouse tox wheel codecov
+
+  - IF NOT %DB_TYPE%==sqlite (cp sqlalchemybwc_ta\config\appveyor_%DB_TYPE%.tpl sqlalchemybwc_ta\config\site_settings.py)
+
+# Not a C# project, build stuff at the test step instead.
+build: false  
+
+before_test:
+  - "createdb test"
+
+test_script:
+  - tox
+
+after_test:
+  # If tests are successful, create a whl package for the project.
+  - python setup.py bdist_wheel
+  - ps: "ls dist"
+
+on_success:
+  - codecov --token=61817145-1d34-489d-af7b-8c2de2b5fc90
+
+artifacts:
+  # Archive the generated wheel package in the ci.appveyor.com build report.
+  - path: dist\*
+

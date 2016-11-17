@@ -72,3 +72,8 @@ except ImportError as e:
     if 'No module named site_settings' not in msg and \
             'No module named sqlalchemybwc_ta.config.site_settings' not in msg:
         raise
+
+try:
+    TestCI  # noqa
+except NameError:
+    TestCI = Test
