@@ -1,3 +1,15 @@
+SQLAlchemyBWC
+=============
+
+.. image:: https://ci.appveyor.com/api/projects/status/kbon082l7ndao16q?svg=true
+    :target: https://ci.appveyor.com/project/level12/sqlalchemybwc
+
+.. image:: https://circleci.com/gh/blazelibs/sqlalchemybwc.svg?style=shield
+    :target: https://circleci.com/gh/blazelibs/sqlalchemybwc
+
+.. image:: https://codecov.io/gh/blazelibs/sqlalchemybwc/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/blazelibs/sqlalchemybwc
+
 Introduction
 ---------------
 
