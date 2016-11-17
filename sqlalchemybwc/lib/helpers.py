@@ -251,7 +251,7 @@ def clear_db_data():
         for row in db.sess.execute(select_sql):
             try:
                 db.sess.execute(truncate_sql.format(row))
-            except Exception as e:
+            except Exception:
                 raise
     elif dialect_name == 'sqlite':
         raise Exception('clear_db_data() does not yet support sqlite')

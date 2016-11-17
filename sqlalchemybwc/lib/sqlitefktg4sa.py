@@ -16,7 +16,6 @@ class SqliteFkTriggerGenerator(object):
                 elif event == 'before-delete':
                     self._drop(fk)
                 else:
-                    #throw exception
                     pass
 
     def _create(self, col, fk):
@@ -40,7 +39,7 @@ class SqliteFkTriggerGenerator(object):
           WHERE %s(SELECT %s FROM %s WHERE %s = NEW.%s) IS NULL;
         END;
         """ % (trigger_name, ftname, ftname, trigger_name,
-                self._null_sql(fcname, fcol), pcname, ptname, pcname, fcname)
+               self._null_sql(fcname, fcol), pcname, ptname, pcname, fcname)
         self._bind.execute(tsql)
 
     def _update_trigger(self, ptname, pcname, ftname, fcol):
@@ -54,7 +53,7 @@ class SqliteFkTriggerGenerator(object):
           WHERE %s(SELECT %s FROM %s WHERE %s = NEW.%s) IS NULL;
         END;
         """ % (trigger_name, ftname, ftname, trigger_name,
-                self._null_sql(fcname, fcol), pcname, ptname, pcname, fcname)
+               self._null_sql(fcname, fcol), pcname, ptname, pcname, fcname)
         self._bind.execute(tsql)
 
     def _delete_trigger(self, ptname, pcname, ftname, fcname):
@@ -106,10 +105,9 @@ class SqliteFkTriggerGenerator(object):
 
 
 def auto_assign(metadata, engine=None):
-    if engine == None:
+    if engine is None:
         engine = metadata.bind
     if engine.dialect.name != 'sqlite':
         return
     for tname in metadata.tables:
         metadata.tables[tname].append_ddl_listener('after-create', SqliteFkTriggerGenerator)
-
