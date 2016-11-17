@@ -1,5 +1,6 @@
 from .settings import Test
 
+
 class TestCI(Test):
     """ default profile when running tests """
     def init(self):
