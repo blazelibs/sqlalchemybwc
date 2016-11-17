@@ -1,4 +1,4 @@
-from settings import Test
+from .settings import Test
 
 class TestCI(Test):
     """ default profile when running tests """
