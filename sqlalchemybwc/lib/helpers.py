@@ -214,14 +214,13 @@ def clear_db():
                 if 'no such table' not in str(e):
                     raise
     elif db.engine.dialect.name == 'mssql':
-        mapping = {
-            'P': 'drop procedure [%(name)s]',
-            'C': 'alter table [%(parent_name)s] drop constraint [%(name)s]',
-            ('FN', 'IF', 'TF'): 'drop function [%(name)s]',
-            'V': 'drop view [%(name)s]',
-            'F': 'alter table [%(parent_name)s] drop constraint [%(name)s]',
-            'U': 'drop table [%(name)s]',
-        }
+        mapping = OrderedDict()
+        mapping['P'] = 'drop procedure [%(name)s]'
+        mapping['C'] = 'alter table [%(parent_name)s] drop constraint [%(name)s]'
+        mapping[('FN', 'IF', 'TF')] = 'drop function [%(name)s]'
+        mapping['V'] = 'drop view [%(name)s]'
+        mapping['F'] = 'alter table [%(parent_name)s] drop constraint [%(name)s]'
+        mapping['U'] = 'drop table [%(name)s]'
         delete_sql = []
         for type, drop_sql in six.iteritems(mapping):
             sql = 'select name, object_name( parent_object_id ) as parent_name '\
