@@ -1,10 +1,12 @@
 Change Log
 ===========
 
-0.2.15 released <in development>
+0.3.0 released 2016-11-29
 --------------------------
 
-- ?
+- add support for Python 3 (3.4 and 3.5)
+- set up continuous integration testing on CodeCov and AppVeyor
+- test coverage is on CodeCov and includes sqlite, postgresql, and mssql
 
 0.2.14 released 2016-02-23
 --------------------------
