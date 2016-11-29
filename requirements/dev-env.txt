@@ -3,8 +3,10 @@
 psycopg2
 pymssql
 
+codecov
 coverage
 flake8
 pyquery
 tox
 webtest
+wheel
