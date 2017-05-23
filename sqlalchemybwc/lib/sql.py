@@ -166,6 +166,6 @@ class SQLLoader(object):
 
     def _loadfile(self, fspath):
         with fspath.open('rb') as fh:
-            sql_file_contents = fh.read()
+            sql_file_contents = fh.read().decode()
             for sql_block in yield_sql_blocks(sql_file_contents):
                 _execute_sql_block(sql_block)

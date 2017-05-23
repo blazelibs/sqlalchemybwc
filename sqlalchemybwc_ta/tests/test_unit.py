@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from blazeutils.testing import raises
 from nose.tools import eq_
 import six
@@ -7,7 +9,7 @@ from sqlalchemybwc.lib.decorators import one_to_none_ncm, \
     assert_raises_null_or_fk_exc, assert_raises_null_exc, assert_raises_fk_exc
 from sqlalchemybwc.lib.helpers import is_unique_exc, _is_unique_msg, \
     _is_unique_error_saval, _is_null_msg, _is_fk_msg, _is_check_const
-from sqlalchemybwc.lib.sql import run_app_sql, run_component_sql
+from sqlalchemybwc.lib.sql import run_app_sql, run_component_sql, SQLLoader
 from sqlalchemybwc.lib.testing import query_to_str
 
 from sqlalchemybwc_ta.model.orm import UniqueRecord, OneToNone, Car, \
@@ -689,6 +691,11 @@ class TestSQLRunFuncs(object):
         run_component_sql('foo', 'run_dir_test')
         eq_(Truck.count(), 2)
         Truck.list()
+
+    def test_sql_loader(self):
+        loader = SQLLoader(str(Path(__file__).parent.parent / 'sql'))
+        loader.load('run_sql_test1.sql')
+        eq_(Truck.count(), 3)
 
 
 class TestAssertRaisesDecorators(object):
