@@ -1,10 +1,10 @@
 Change Log
 ===========
 
-0.3.1 released <in development>
+0.3.1 released 2017-06-02
 --------------------------
 
-- ?
+- fix bytes/unicode problem with SQLLoader
 
 0.3.0 released 2016-11-29
 --------------------------
