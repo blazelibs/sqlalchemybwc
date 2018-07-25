@@ -83,9 +83,10 @@ install:
   - python --version
   - python -c "import struct; print(struct.calcsize('P') * 8)"
   - pip --version
+  - virtualenv --version
 
   # Install tox from the wheelhouse
-  - python -m pip install --upgrade pip
+  - python -m pip install --upgrade pip virtualenv
   - pip install --no-index --find-links=requirements/wheelhouse tox wheel codecov
 
   - IF NOT %DB_TYPE%==sqlite (cp sqlalchemybwc_ta\config\appveyor_%DB_TYPE%.tpl sqlalchemybwc_ta\config\site_settings.py)
@@ -97,11 +98,11 @@ before_test:
   - "createdb test"
 
 test_script:
-  - tox
+  - "%PYTHON%\\Scripts\\tox.exe"
 
 after_test:
   # If tests are successful, create a whl package for the project.
-  - python setup.py bdist_wheel
+  - "%PYTHON%\\python.exe setup.py bdist_wheel"
   - ps: "ls dist"
 
 on_success:
