@@ -638,6 +638,16 @@ def test_lookup_object():
     assert not CT.add_iu(label=u'one')
 
 
+def test_len_created_lookup_label():
+    CustomerType.delete_all()
+    CustomerType.testing_create()
+
+    ct = CustomerType.first()
+
+    # Expect 'CustomerType ' + randchars(10)
+    eq_(len(ct.label), 23)
+
+
 def test_sa_column_names():
     eq_(CustomerType.sa_column_names(), ['id', 'createdts', 'updatedts', 'active_flag', 'label'])
     eq_(Truck.sa_column_names(), ['id', 'createdts', 'updatedts', 'make', 'model'])

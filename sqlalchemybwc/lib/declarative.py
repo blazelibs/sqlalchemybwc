@@ -299,7 +299,7 @@ class LookupMixin(DefaultMixin):
     @classmethod
     def testing_create(cls, label=None, active=True):
         if label is None:
-            label = u'%s %s' % (cls.__name__, randchars(5))
+            label = u'%s %s' % (cls.__name__, randchars(10))
         return cls.add(label=label, active_flag=active)
 
     @classmethod
